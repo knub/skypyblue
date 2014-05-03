@@ -27,7 +27,7 @@ digraph G {
 
 	"mvine-rekove-cn" -> "mvine-grow";
 
-	"mvine-enforce-cn" -> "possible-method";
+	# "mvine-enforce-cn" -> "possible-method";
 	"mvine-enforce-cn" -> "mvine-grow";
 
 	"propagate-walk-strength" -> "new-mark";
@@ -35,7 +35,7 @@ digraph G {
 	"propagate-walk-strength" -> "any-immediate-upstream-cns-marked";
 	"propagate-walk-strength" -> "compute-walkabout-strengths";
 
-	"compute-walkabout-strengths" -> "max-out";
+	# "compute-walkabout-strengths" -> "max-out";
 
 	"collect-unenforced" -> "new-mark";
 	"collect-unenforced" -> "collect-unenforced-mark";
