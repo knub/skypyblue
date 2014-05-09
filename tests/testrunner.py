@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Usage: 
   ./testrunner.py                     -> executes all tests
