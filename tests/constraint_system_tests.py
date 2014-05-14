@@ -1,7 +1,6 @@
 import unittest
 from constraint_system import ConstraintSystem
-from models.constraint import Constraint
-from models.strengths import Strength
+from models import Constraint, Strength
 
 class ConstraintSystemTest(unittest.TestCase):
   """
