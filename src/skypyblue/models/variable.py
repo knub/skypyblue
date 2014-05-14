@@ -6,3 +6,6 @@ class Variable:
     self.constraints = []
     self.determined_by = None
     self.walk_strength = walk_strength
+    self.mark = None
+    self.valid = True
+
