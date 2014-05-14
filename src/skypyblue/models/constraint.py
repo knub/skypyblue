@@ -18,7 +18,3 @@ class Constraint:
   def is_enforced(self):
     "returns True is there is is a method selected, otherwise False"
     return not self.selected_method is None
-
-
-
-help(Constraint)
