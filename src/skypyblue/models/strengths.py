@@ -1,5 +1,5 @@
 from enum import Enum
 
-class WalkaboutStrength(Enum):
+class Strength(Enum):
   WEAKEST, WEAK, MEDIUM, STRONG, REQUIRED = range(5)
 
