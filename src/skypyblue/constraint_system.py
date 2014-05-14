@@ -1,4 +1,5 @@
-class ContraintSystem:
+class ConstraintSystem:
+
   def __init__(self):
     self.constraints = []
     self.variables = []
@@ -8,8 +9,10 @@ class ContraintSystem:
     self variables.append(variable)
 
   def add_constraint(self, constraint):
-    constraint.
-    pass
+    for variable in constraint.variables:
+      variable.add_constraint(constraint)
+    exec_roots = update_method_graph(constraint)
+    exec_from_roots(exec_roots)
 
   def remove_constraint(self, constraint): 
     pass

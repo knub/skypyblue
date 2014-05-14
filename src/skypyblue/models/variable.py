@@ -16,3 +16,6 @@ class Variable:
   def set_value(self, value):
     self._value = value
 
+  def add_constraint(self, constraint)
+    self.constraints.append(constraint)
+
