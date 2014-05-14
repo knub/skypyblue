@@ -1,4 +1,7 @@
-c = 0
+from models.strengths import Strength
+
+weaker = Strength.weaker
+
 
 def add_constraint(cn):
   unenforced_cns = []
@@ -20,7 +23,7 @@ def remove_constraing(cn):
   cn.selected_method = None
   for var in cn_old_outputs:
     var.determined_by = None
-    var.walk_strength = 0
+    var.walk_strength = Strength.WEAKEST
   exec_roots = cn_old_outputs
   propagate_walk_strength(cn_old_outputs)
   unenforced_cns = collect_unenforced(cn_old_outputs, cn.strength, True)
@@ -66,7 +69,7 @@ def mvine_revoke_cn(cn, root_strength, done_mark, mvine_stack, redetermined_vars
     for var in cn.selected_method.outputs:
       if var.mark != done_mark:
         var.determined_by = None
-        var.walk_strength = 0
+        var.walk_strength = Strength.WEAKEST
         redetermined_vars.append(var)
     cn.selected_method = None
     return True
@@ -89,7 +92,7 @@ def mvine_enforce_cn(cn, root_strength, done_mark, mvine_stack, redetermined_var
           for var in cn.selected_method.outputs:
             if var.mark != done_mark:
               var.determined_by = None
-              var.walk_strength = 0
+              var.walk_strength = Strength.WEAKEST
               redetermined_vars.append(var)
         cn.selected_method = mt
         for var in mt.outputs:
@@ -122,7 +125,7 @@ def propagate_walk_strength(roots):
       for var  in cn.selected_method.inputs:
         if var.determined_by != None:
           if var.determined_by.mark == prop_mark:
-            var.walk_strength = 0
+            var.walk_strength = Strength.WEAKEST
     compute_walkabout_strengths(cn)
     cn.mark = None
 
@@ -142,13 +145,6 @@ def compute_walkabout_strengths(cn):
         if weaker(max_strength, min_strength):
           min_strength = max_strength
     out_var.walk_strength = min_strength
-
-def max_out(mt, current_outputs):
-  max_strength = 0
-  for var in mt.outputs:
-    if not var in current_outputs and weaker(max_strength, var.walk_strength):
-      max_strength = var.walk_strength
-  return max_strength
 
 def collect_unenforced(unenforced_cns, vars, collection_strength, collect_equal_strength):
   done_mark = new_mark()
@@ -274,8 +270,19 @@ def execute_plan(plan):
   else:
     raise ValueError("trying to execute invalid plan")
 
+
+c = 0
 def new_mark():
   global c
   c += 1
   return c
+
+
+def max_out(mt, current_outputs):
+  max_strength = Strength.WEAKEST
+  for var in mt.outputs:
+    if not var in current_outputs and \
+      weaker(max_strength, var.walk_strength):
+      max_strength = var.walk_strength
+  return max_strength
 
