@@ -1,5 +1,7 @@
 import unittest
 from constraint_system import ConstraintSystem
+from models.constraint import Constraint
+from models.strengths import Strength
 
 class ConstraintSystemTest(unittest.TestCase):
   """
@@ -8,21 +10,21 @@ class ConstraintSystemTest(unittest.TestCase):
   def setUp(self):
     self.cs = ConstraintSystem()
     self.v1 = self.cs.create_variable("v1", 15)
-    self.c1 = Constraint(lambda x: True, Strength.REQUIRED, [v1], [])
+    self.c1 = Constraint(lambda x: True, Strength.REQUIRED, [self.v1], [])
 
   def test_create_variable(self):
-    self.assertTrue(v1 in self.cs.variables)
+    self.assertTrue(self.v1 in self.cs.variables)
 
   def test_get_and_set_variable(self):
-    self.assertEquals(self.v1.get_value, 15)
+    self.assertEqual(self.v1.get_value, 15)
     self.v1.set_value(10)
-    self.assertEquals(10, self.v1.get_value())
+    self.assertEqual(10, self.v1.get_value())
 
   def test_variable_constraints_is_set_after_add_constraint(self):
     self.cs.add_constraint(self.c1)
-    assertTrue(self.c1 in self.v1.constraints)
+    self.assertTrue(self.c1 in self.v1.constraints)
 
   def test_variable_constraints_is_set_after_remove_constraint(self):
     self.cs.add_constraint(self.c1)
     self.cs.remove_constraint(self.c1)
-    assertEquals([], self.v1.constraints)
+    self.assertEqual([], self.v1.constraints)

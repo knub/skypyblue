@@ -1,3 +1,4 @@
+from models.variable import Variable
 
 class ConstraintSystem:
 
@@ -16,8 +17,8 @@ class ConstraintSystem:
 
     for variable in constraint.variables:
       variable.add_constraint(constraint)
-    exec_roots = update_method_graph(constraint)
-    exec_from_roots(exec_roots)
+    exec_roots = self.update_method_graph(constraint)
+    self.exec_from_roots(exec_roots)
 
   def remove_constraint(self, constraint):
     for variable in constraint.variables:

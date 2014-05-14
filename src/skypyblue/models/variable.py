@@ -1,4 +1,4 @@
-from strengths import *
+from models.strengths import *
 
 class Variable:
   def __init__(self, name, value, walk_strength = Strength.WEAKEST):
@@ -16,9 +16,9 @@ class Variable:
   def set_value(self, value):
     self._value = value
 
-  def remove_constraint(constraint):
+  def remove_constraint(self,constraint):
       self.constraints=[cn for cn in self.constraints if cn!=constraint]
 
-  def add_constraint(self, constraint)
+  def add_constraint(self, constraint):
     self.constraints.append(constraint)
 
