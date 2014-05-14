@@ -6,7 +6,7 @@ class ConstraintSystem:
 
   def create_variable(self, name, initialValue):
     variable = Variable(name, initialValue)
-    self variables.append(variable)
+    self.variables.append(variable)
 
   def add_constraint(self, constraint):
     for variable in constraint.variables:
@@ -20,5 +20,5 @@ class ConstraintSystem:
   def update_method_graph(self, constraint): 
     pass
 
-  def exec_from_roots(exec_roots):
+  def exec_from_roots(self, exec_roots):
     pass
