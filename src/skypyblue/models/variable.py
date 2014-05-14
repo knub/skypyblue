@@ -16,6 +16,9 @@ class Variable:
   def set_value(self, value):
     self._value = value
 
+  def remove_constraint(constraint):
+      self.constraints=[cn for cn in self.constraints if cn!=constraint]
+
   def add_constraint(self, constraint)
     self.constraints.append(constraint)
 
