@@ -16,7 +16,7 @@ class ConstraintSystemTest(unittest.TestCase):
     self.assertTrue(self.v1 in self.cs.variables)
 
   def test_get_and_set_variable(self):
-    self.assertEqual(self.v1.get_value, 15)
+    self.assertEqual(self.v1.get_value(), 15)
     self.v1.set_value(10)
     self.assertEqual(10, self.v1.get_value())
 
