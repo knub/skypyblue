@@ -6,6 +6,13 @@ class Constraint:
     strength:   \tis of type skypyblue.models.strength.Strength and indicates how important it is to fullfill the contraint
     variables:   \tlist of skypyblue.models.variables.Variable that are involved in the contraint
     methods:    \tlist of skypyblue.models.methods.Method that can fullfill a contraint
+    
+    Usage:
+      c = Constraint(
+        lambda v1, v2: v1 < v2,
+        Strength.STRONG, 
+        [v1, v2], 
+        [some_method])
     """
     self.check_function = check_function
     self.strength = strength
