@@ -1,3 +1,4 @@
+
 class ConstraintSystem:
 
   def __init__(self):

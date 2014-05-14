@@ -8,10 +8,10 @@ Usage:
 if __name__ != "__main__": exit()
 
 import unittest, sys
-sys.path.append("../src")
+sys.path.append("../src/skypyblue")
 
 
-from sometestmodule import *
+from constraint_system_tests import *
 
 unittest.main()
 
