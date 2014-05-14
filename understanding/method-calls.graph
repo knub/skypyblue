@@ -25,7 +25,7 @@ digraph G {
 	"mvine-grow" -> "mvine-revoke-cn";
 	"mvine-grow" -> "mvine-enforce-cn";
 
-	"mvine-rekove-cn" -> "mvine-grow";
+	"mvine-revoke-cn" -> "mvine-grow";
 
 	# "mvine-enforce-cn" -> "possible-method";
 	"mvine-enforce-cn" -> "mvine-grow";
