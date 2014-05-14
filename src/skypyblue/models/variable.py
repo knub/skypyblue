@@ -1,7 +1,8 @@
 from strengths import *
 
 class Variable:
-  def __init__(self, value, walk_strength = Strength.WEAKEST):
+  def __init__(self, name, value, walk_strength = Strength.WEAKEST):
+    self.name = name
     self._value = value
     self.constraints = []
     self.determined_by = None
