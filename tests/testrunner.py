@@ -12,6 +12,7 @@ sys.path.append("../src/skypyblue")
 
 
 from constraint_system_tests import *
+from variable_tests import *
 
 unittest.main()
 

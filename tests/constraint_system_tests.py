@@ -15,11 +15,6 @@ class ConstraintSystemTest(unittest.TestCase):
   def test_create_variable(self):
     self.assertTrue(self.v1 in self.cs.variables)
 
-  def test_get_and_set_variable(self):
-    self.assertEqual(self.v1.get_value(), 15)
-    self.v1.set_value(10)
-    self.assertEqual(10, self.v1.get_value())
-
   def test_variable_constraints_is_set_after_add_constraint(self):
     self.cs.add_constraint(self.c1)
     self.assertTrue(self.c1 in self.v1.constraints)
