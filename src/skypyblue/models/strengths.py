@@ -1,9 +1,8 @@
 try:
   from enum import IntEnum
 except ImportError as e:
-  print(e)
   print("your python version does not provides the enum module. please install enum34 package(eg. with 'pip install enum34')!")
-  exit()
+  raise e
 
 class Strength(IntEnum):
   WEAKEST, WEAK, MEDIUM, STRONG, REQUIRED = range(5)
