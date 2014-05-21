@@ -15,6 +15,9 @@ class Point(object):
   def isMidpoint(self, point1, point2):
     return self.X == (point1.X+point2.X)/2 and self.Y == (point1.Y+point2.Y)/2
 
+  def print_position(self):
+    print(self.X,'@',self.Y)
+
 class MidpointTestClass(unittest.TestCase):
   def setUp(self):
     self.constraint_system =ConstraintSystem()
@@ -47,18 +50,18 @@ class MidpointTestClass(unittest.TestCase):
     point2 = self.point2.get_value()
     self.assertTrue(midpoint.isMidpoint(point1,point2))
 
-  def test_change_point1(self):
-    self.point1.set_value(Point(0,0))
-    self.constraint_system.exec_from_roots([self.point1])
-    point1 = self.point1.get_value()
-    self.test_contraint()
-    self.assertEqual(point1.X, 0)
-    self.assertEqual(point1.Y, 0)
+  # def test_change_point1(self):
+  #   self.point1.set_value(Point(0,0))
+  #   self.constraint_system.exec_from_roots([self.point1])
+  #   point1 = self.point1.get_value()
+  #   self.test_contraint()
+  #   self.assertEqual(point1.X, 0)
+  #   self.assertEqual(point1.Y, 0)
 
-  def test_change_midpoint(self):
-    self.midpoint.set_value(Point(0,0))
-    self.constraint_system.exec_from_roots([self.midpoint])
-    midpoint = self.midpoint.get_value()
-    self.test_contraint()
-    self.assertEqual(midpoint.X, 0)
-    self.assertEqual(midpoint.Y, 0)
+  # def test_change_midpoint(self):
+  #   self.midpoint.set_value(Point(0,0))
+  #   self.constraint_system.exec_from_roots([self.midpoint])
+  #   midpoint = self.midpoint.get_value()
+  #   self.test_contraint()
+  #   self.assertEqual(midpoint.X, 0)
+  #   self.assertEqual(midpoint.Y, 0)

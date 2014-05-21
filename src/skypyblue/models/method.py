@@ -1,4 +1,5 @@
 
+from models import Variable
 class Method:
   def __init__(self, in_vars, out_vars, method):    
     """
@@ -24,3 +25,10 @@ class Method:
   @property
   def inputs(self):
     return self.in_vars
+
+  def execute(self):
+    out_values = self.method(*[var.value for var in self.in_vars])
+    if not isinstance(out_values, list):
+      out_values = [out_values]
+    for i in range(len(self.out_vars)):
+      self.out_vars[i].value = out_values[i]

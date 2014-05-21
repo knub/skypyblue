@@ -1,4 +1,5 @@
 from models import Variable, Strength, Constraint
+import pdb;
 
 class ConstraintSystem:
 
@@ -18,7 +19,9 @@ class ConstraintSystem:
 
     for variable in constraint.variables:
       variable.add_constraint(constraint)
-    exec_roots = self.update_method_graph([constraint])
+    #pdb.set_trace()
+    exec_roots = []
+    self.update_method_graph([constraint], exec_roots)
     self.exec_from_roots(exec_roots)
 
   def remove_constraint(self, constraint):
@@ -43,25 +46,31 @@ class ConstraintSystem:
       self.exec_from_roots(exec_roots)
       
 
-  def update_method_graph(self, unenforcedConstraints, exec_roots=[]): 
-
-    while not unenforcedConstraints:
-      cn = self.strongest_constraint(unenforcedConstraints)
-      unenforcedConstraints.remove(cn)
-      redetermined_vars, ok = build_mvine(cn, redetermined_vars)
+  def update_method_graph(self, unenforced_constraints, exec_roots): 
+    while unenforced_constraints:
+      cn = self.strongest_constraint(unenforced_constraints)
+      unenforced_constraints.remove(cn)
+      redetermined_vars = []
+      ok = self.build_mvine(cn, redetermined_vars)
       if not ok: return
       self.propagate_walk_strength([cn] + [redetermined_vars])
-      unenforcedConstraints = self.collect_unenforced(redetermined_vars, cn.strength, false)
+      self.collect_unenforced(unenforced_constraints, redetermined_vars, cn.strength, False)
       exec_roots.append(cn)
       for var in redetermined_vars:
         if var.determined_by is None:
           exec_roots.append(var)
-    return exec_roots
+
+  def strongest_constraint(self, constraints):
+    constraints.sort(key=lambda cn: cn.strength, reverse=True)
+    return constraints[0]
+
+  def weakest_constraint(self, constraints):
+    constraints.sort(key=lambda cn: cn.strength)  
+    return constraints[0]
 
   def build_mvine(self, cn, redetermined_vars):
     mvine_stack = []
     done_mark = self.new_mark()
-
     return self.mvine_enforce_cn(cn, cn.strength, done_mark, mvine_stack, redetermined_vars)
 
   def mvine_grow(self, root_strength, done_mark, mvine_stack, redetermined_vars):
@@ -69,7 +78,7 @@ class ConstraintSystem:
     cn = mvine_stack.pop()
     if cn.mark == done_mark:
       ok = self.mvine_grow(root_strength, done_mark, mvine_stack, redetermined_vars)
-    elif self.weaker(cn.strength, root_strength):
+    elif Strength.weaker(cn.strength, root_strength):
       ok = self.mvine_revoke_cn(cn, root_strength, done_mark, mvine_stack, redetermined_vars)
     else:
       ok = self.mvine_enforce_cn(cn, root_strength, done_mark, mvine_stack, redetermined_vars)
@@ -119,10 +128,17 @@ class ConstraintSystem:
     cn.mark = None
     return False
 
+  def all_constraints_that_determine_a_var_in(self, variables):
+    constraints = set()
+    for variable in variables:
+      if variable.determined_by != None:
+        constraints.add(variable.determined_by)
+    return constraints
+
   def possible_method(self, mt, cn, root_strength, done_mark):
     for var in mt.outputs:
       if var.mark == done_mark: return False
-      if not self.weaker(var.walk_strength, root_strength):
+      if not Strength.weaker(var.walk_strength, root_strength):
         if cn.selected_method == None: 
           return False
         if not var in cn.selected_method.outputs: 
@@ -131,7 +147,8 @@ class ConstraintSystem:
 
   def propagate_walk_strength(self, roots):
     prop_mark = self.new_mark()
-    walk_pplan = self.pplan_add(walk_pplan, roots, prop_mark)
+    walk_pplan = []
+    self.pplan_add(walk_pplan, roots, prop_mark)
 
     while walk_pplan:
       cn = walk_pplan.pop()
@@ -149,21 +166,21 @@ class ConstraintSystem:
           return True
     return False
 
-  def compute_walkabout_strengths(cn):
+  def compute_walkabout_strengths(self, cn):
     current_outputs = cn.selected_method.outputs
     for out_var in current_outputs:
       min_strength = cn.strength
       for mt in cn.methods:
         if not out_var in mt.outputs:
           max_strength = self.max_out(mt, current_outputs)
-          if self.weaker(max_strength, min_strength):
+          if Strength.weaker(max_strength, min_strength):
             min_strength = max_strength
       out_var.walk_strength = min_strength
 
   def collect_unenforced(self, unenforced_cns, vars, collection_strength, collect_equal_strength):
     done_mark = self.new_mark()
     for var in vars:
-      self.unenforced_cns.extend(self.collect_unenforced_mark(unenforced_cns, var, collection_strength, collect_equal_strength, done_mark))
+      unenforced_cns.extend(self.collect_unenforced_mark(unenforced_cns, var, collection_strength, collect_equal_strength, done_mark))
     return unenforced_cns
 
   def collect_unenforced_mark(self, unenforced_cns, var, collection_strength, collect_equal_strength, done_mark):
@@ -173,7 +190,7 @@ class ConstraintSystem:
         if cn.is_enforced:
           for out_var in cn.selected_method.outputs:
             self.collect_unenforced_mark(unenforced_cns, out_var, collection_strength, collect_equal_strength, done_mark)
-        elif self.weaker(cn.strength, collection_strength) or \
+        elif Strength.weaker(cn.strength, collection_strength) or \
               (collect_equal_strength and (cn.strength == collection_strength)):
           unenforced_cns.append(cn)
     return unenforced_cns
@@ -181,13 +198,16 @@ class ConstraintSystem:
   def exec_from_roots(self, exec_roots):
     prop_mark = self.new_mark()
     exec_pplan = []
+
     for cn in exec_roots:
-      exec_pplan.extend(self.pplan_add(exec_pplan, cn, prop_mark))
+      if isinstance(cn, Constraint):
+        exec_pplan.extend(self.pplan_add(exec_pplan, cn, prop_mark))
 
     for var in exec_roots:
-      if var.determined_by == None and not var.valid:
-        exec_pplan.extend(var, prop_mark)
-        var.valid = True
+      if isinstance(var, Variable):
+        if var.determined_by == None and not var.valid:
+          exec_pplan.extend(var, prop_mark)
+          var.valid = True
 
     while exec_pplan:
       cn = exec_pplan.pop()
@@ -201,7 +221,7 @@ class ConstraintSystem:
         cn.mark = None
         self.execute_propagate_valid(cn)
 
-  def execute_propagate_valid(self, cm):
+  def execute_propagate_valid(self, cn):
     inputs_valid = True
     for var in cn.selected_method.inputs:
       if not var.valid:
@@ -233,7 +253,7 @@ class ConstraintSystem:
           self.pplan_add(pplan, cn, done_mark)
     elif isinstance(obj, list):
       for elt in obj:
-        self.pplan_add(pplan_add(pplan, elt, done_mark))
+        self.pplan_add(pplan, elt, done_mark)
 
     return pplan
 
@@ -294,7 +314,7 @@ class ConstraintSystem:
     max_strength = Strength.WEAKEST
     for var in mt.outputs:
       if not var in current_outputs and \
-        self.weaker(max_strength, var.walk_strength):
+        Strength.weaker(max_strength, var.walk_strength):
         max_strength = var.walk_strength
     return max_strength
 
