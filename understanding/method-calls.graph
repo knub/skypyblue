@@ -6,6 +6,8 @@ digraph G {
 	node [color="#EEEEEE"]
 	edge [color="#31CEF0"]
 
+	"new_mark" [];
+
 	"add-constraint" -> "update-method-graph";
 	"add-constraint" -> "exec-from-roots";
 

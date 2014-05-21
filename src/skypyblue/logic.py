@@ -13,7 +13,7 @@ def add_constraint(cn):
   exec_roots = update_method_graph(unenforced_cns)
   exec_from_roots(exec_roots)
 
-def remove_constraing(cn):
+def remove_constraint(cn):
   for var in cn.variables:
     var.constraints.remove(cn)
   if not cn.enforced(): return 
@@ -64,8 +64,7 @@ def mvine_grow(root_strength, done_mark, mvine_stack, redetermined_vars):
 
 def mvine_revoke_cn(cn, root_strength, done_mark, mvine_stack, redetermined_vars):
   cn.mark = done_mark
-  ok = mvine_grow(root_strength, done_mark, mvine_stack)
-  if ok:
+  if mvine_grow(root_strength, done_mark, mvine_stack, redetermined_vars):
     for var in cn.selected_method.outputs:
       if var.mark != done_mark:
         var.determined_by = None
