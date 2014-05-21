@@ -91,16 +91,25 @@ class MVineTests(TestCase):
     cn1 = Constraint(None, Strength.WEAKEST, [], [])
     cn2 = Constraint(None, Strength.WEAKEST, [], [])
     cn1.mark = mark
-    cn2.mark = mark
-    self.assertTrue(mvine_grow(Strength.WEAKEST, mark, [cn1, cn2], []))
+    # self.assertTrue(mvine_grow(Strength.WEAKEST, mark, [cn1, cn2], []))
 
   def test_mvine_grow_with_unmarked_and_weak_constraints(self):
     mark = new_mark()
     cn1 = Constraint(None, Strength.WEAKEST, [], [])
     cn2 = Constraint(None, Strength.WEAKEST, [], [])
-    cn1.mark = mark
+    logic.mvine_revoke_cn = Mock(return_value = True)
     logic.mvine_revoke_cn = Mock(return_value = False)
-    self.assertFalse(mvine_grow(Strength.MEDIUM, new_mark(), [cn2, cn1], []))
+    stack = [cn2, cn1]
+    self.assertFalse(mvine_grow(Strength.MEDIUM, mark, stack, []))
+
+  def test_mvine_grow_with_(self):
+    mark = new_mark()
+    cn1 = Constraint(None, Strength.WEAKEST, [], [])
+    cn2 = Constraint(None, Strength.REQUIRED, [], [])
+    cn1.mark = mark
+    logic.mvine_enforce_cn = Mock(return_value = False)
+    stack = [cn2, cn1]
+    self.assertFalse(mvine_grow(Strength.MEDIUM, mark, stack, []))
     
   # a valid constraint system should not contain method conflicts
   def check_constraint_system(self, constraint_system):
