@@ -64,7 +64,7 @@ def mvine_grow(root_strength, done_mark, mvine_stack, redetermined_vars):
 
 def mvine_revoke_cn(cn, root_strength, done_mark, mvine_stack, redetermined_vars):
   cn.mark = done_mark
-  if mvine_grow(root_strength, done_mark, mvine_stack):
+  if mvine_grow(root_strength, done_mark, mvine_stack, redetermined_vars):
     for var in cn.selected_method.outputs:
       if var.mark != done_mark:
         var.determined_by = None

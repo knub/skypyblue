@@ -1,7 +1,9 @@
 from unittest import TestCase
+from unittest.mock import MagicMock
+
 from logic import *
+import logic
 from models import *
-   
 
 class HelperTests(TestCase):
 
@@ -21,4 +23,22 @@ class HelperTests(TestCase):
       used_marks.add(mark)
 
 class MVineTests(TestCase):
-  pass
+  def test_mvine_revoke_cn(self):
+    cn = Constraint(None, Strength.WEAKEST, [], [])
+    cn.mark = new_mark()
+    logic.mvine_grow = MagicMock(return_value = False)
+    not_revoked = mvine_revoke_cn(cn, Strength.WEAKEST, new_mark(), [], [])
+    self.assertFalse(not_revoked)
+    self.assertTrue(cn.mark is None)
+
+    logic.mvine_grow = MagicMock(return_value = True)
+    cn = Constraint(None, Strength.WEAKEST, [], [])
+    v1 = Variable("v1", 1, Strength.WEAK)
+    v2 = Variable("v2", 2, Strength.WEAK)
+    v3 = Variable("v3", 3, Strength.WEAK)
+    cn.selected_method = Method([v1, v2], v3, None)
+    
+
+
+    
+    # mvine_revoke_cn(cn, Strength.WEAKEST, new_mark(), [], [])
