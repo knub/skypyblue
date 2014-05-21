@@ -4,6 +4,9 @@ from unittest.mock import MagicMock
 from logic import *
 import logic
 from models import *
+# Test ideas:
+# - when a stable constraint system is executed multiple times, the results
+#   stay the same (idempotence)
 
 class HelperTests(TestCase):
 
@@ -39,6 +42,17 @@ class MVineTests(TestCase):
     cn.selected_method = Method([v1, v2], v3, None)
     
 
+  # mvine_revoke_cn(cn, Strength.WEAKEST, new_mark(), [], [])
 
     
-    # mvine_revoke_cn(cn, Strength.WEAKEST, new_mark(), [], [])
+  # a valid constraint system should not contain method conflicts
+  def check_constraint_system(self, constraint_system):
+    constrained_variables = set()
+    for constraint in constraint_system.constraints:
+      if not constraint.is_enforced:
+        continue
+      for out_var in constraint.selected_method.out_vars:
+        if out_var in constrained_variables:
+          return False
+        constrained_variables.add(out_var)
+    return True
