@@ -59,7 +59,8 @@ def mvine_grow(root_strength, done_mark, mvine_stack, redetermined_vars):
     ok = mvine_revoke_cn(cn, root_strength, done_mark, mvine_stack, redetermined_vars)
   else:
     ok = mvine_enforce_cn(cn, root_strength, done_mark, mvine_stack, redetermined_vars)
-  if not ok: mvine_stack.append(cn)
+  if not ok:
+    mvine_stack.append(cn)
   return ok
 
 def mvine_revoke_cn(cn, root_strength, done_mark, mvine_stack, redetermined_vars):

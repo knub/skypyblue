@@ -29,7 +29,7 @@ class HelperTests(TestCase):
       used_marks.add(mark)
 
 class MVineTests(TestCase):
-  def test_mvine_revoke_cn_failed(self):
+  def test_mvine_revoke_cn_fails(self):
     logic.mvine_grow = Mock(return_value = False)
     cn = Constraint(None, Strength.WEAKEST, [], [])
     cn.mark = new_mark()
@@ -39,8 +39,7 @@ class MVineTests(TestCase):
     self.assertFalse(not_revoked)
     self.assertTrue(cn.mark is None)
 
-
-  def test_mvine_revoke_cn_succeeded(self):
+  def test_mvine_revoke_cn_succeeds(self):
     logic.mvine_grow = Mock(return_value = True)
 
 
@@ -91,17 +90,48 @@ class MVineTests(TestCase):
     cn1 = Constraint(None, Strength.WEAKEST, [], [])
     cn2 = Constraint(None, Strength.WEAKEST, [], [])
     cn1.mark = mark
-    cn2.mark = mark
-    self.assertTrue(mvine_grow(Strength.WEAKEST, mark, [cn1, cn2], []))
+    # self.assertTrue(mvine_grow(Strength.WEAKEST, mark, [cn1, cn2], []))
 
   def test_mvine_grow_with_unmarked_and_weak_constraints(self):
     mark = new_mark()
     cn1 = Constraint(None, Strength.WEAKEST, [], [])
     cn2 = Constraint(None, Strength.WEAKEST, [], [])
-    cn1.mark = mark
+    logic.mvine_revoke_cn = Mock(return_value = True)
     logic.mvine_revoke_cn = Mock(return_value = False)
-    self.assertFalse(mvine_grow(Strength.MEDIUM, new_mark(), [cn2, cn1], []))
+    stack = [cn2, cn1]
+    self.assertFalse(mvine_grow(Strength.MEDIUM, mark, stack, []))
+
+  def test_mvine_grow_with_(self):
+    mark = new_mark()
+    cn1 = Constraint(None, Strength.WEAKEST, [], [])
+    cn2 = Constraint(None, Strength.REQUIRED, [], [])
+    cn1.mark = mark
+    logic.mvine_enforce_cn = Mock(return_value = False)
+    stack = [cn2, cn1]
+    self.assertFalse(mvine_grow(Strength.MEDIUM, mark, stack, []))
     
+
+  def test_mvine_enforce_cn_with_no_methods_fails(self):
+    cn = Constraint(None, Strength.WEAKEST, [], [])
+    cn.mark = new_mark()
+    logic.possible_method = Mock(return_value = False)
+
+    self.assertFalse(mvine_enforce_cn(cn, Strength.WEAKEST, new_mark(), [], []))
+    self.assertTrue(cn.mark is None)
+
+  def test_mvine_enforce_cn_fails(self):
+    v1 = Variable("v1", 1)
+    v2 = Variable("v2", 2)
+    v3 = Variable("v3", 3)
+    m = Method([v1, v2], v3, None)
+    cn = Constraint(None, Strength.WEAKEST, [], m)
+    cn.mark = new_mark()
+    logic.possible_method = Mock(return_value = False)
+
+    self.assertFalse(mvine_enforce_cn(cn, Strength.WEAKEST, new_mark(), [], []))
+    self.assertTrue(cn.mark is None)
+
+
   # a valid constraint system should not contain method conflicts
   def check_constraint_system(self, constraint_system):
     constrained_variables = set()
