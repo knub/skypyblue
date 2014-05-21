@@ -19,3 +19,6 @@ class HelperTests(TestCase):
       mark  = new_mark()
       self.assertTrue(mark not in used_marks)
       used_marks.add(mark)
+
+class MVineTests(TestCase):
+  pass
