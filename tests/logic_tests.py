@@ -1,5 +1,8 @@
 from unittest import TestCase
-from unittest.mock import MagicMock
+try:
+  from unittest.mock import MagicMock as Mock
+except ImportError as e:
+  from mock import Mock
 
 from logic import *
 import logic
@@ -27,7 +30,7 @@ class HelperTests(TestCase):
 
 class MVineTests(TestCase):
   def test_mvine_revoke_cn_failed(self):
-    logic.mvine_grow = MagicMock(return_value = False)
+    logic.mvine_grow = Mock(return_value = False)
     cn = Constraint(None, Strength.WEAKEST, [], [])
     cn.mark = new_mark()
 
@@ -38,7 +41,7 @@ class MVineTests(TestCase):
 
 
   def test_mvine_revoke_cn_succeeded(self):
-    logic.mvine_grow = MagicMock(return_value = True)
+    logic.mvine_grow = Mock(return_value = True)
 
 
     cn = Constraint(None, Strength.WEAKEST, [], [])
@@ -96,7 +99,7 @@ class MVineTests(TestCase):
     cn1 = Constraint(None, Strength.WEAKEST, [], [])
     cn2 = Constraint(None, Strength.WEAKEST, [], [])
     cn1.mark = mark
-    logic.mvine_revoke_cn = MagicMock(return_value = False)
+    logic.mvine_revoke_cn = Mock(return_value = False)
     self.assertFalse(mvine_grow(Strength.MEDIUM, new_mark(), [cn2, cn1], []))
     
   # a valid constraint system should not contain method conflicts
