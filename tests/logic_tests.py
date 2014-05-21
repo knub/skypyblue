@@ -14,6 +14,8 @@ class HelperTests(TestCase):
     self.assertEqual(Strength.WEAKEST, max_out(method, [v1]))
 
   def test_new_mark_are_numbers(self):
-    start = new_mark() + 1
-    for i in range(start, start + 100):
-      self.assertEqual(i, new_mark(), "marks should be increasing numbers")
+    used_marks = set()
+    for i in range(100):
+      mark  = new_mark()
+      self.assertTrue(mark not in used_marks)
+      used_marks.add(mark)

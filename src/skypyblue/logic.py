@@ -13,7 +13,7 @@ def add_constraint(cn):
   exec_roots = update_method_graph(unenforced_cns)
   exec_from_roots(exec_roots)
 
-def remove_constraing(cn):
+def remove_constraint(cn):
   for var in cn.variables:
     var.constraints.remove(cn)
   if not cn.enforced(): return 
