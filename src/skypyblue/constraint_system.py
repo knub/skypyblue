@@ -1,4 +1,5 @@
 from models.variable import Variable
+from models.strengths import Strength
 
 class ConstraintSystem:
 
@@ -17,7 +18,7 @@ class ConstraintSystem:
 
     for variable in constraint.variables:
       variable.add_constraint(constraint)
-    exec_roots = self.update_method_graph(constraint)
+    exec_roots = self.update_method_graph([constraint])
     self.exec_from_roots(exec_roots)
 
   def remove_constraint(self, constraint):
@@ -28,10 +29,29 @@ class ConstraintSystem:
       old_outputs = constraint.selected_method.outputs
       constraint.selected_method = None
 
+      exec_roots = []
+
+      for variable in old_outputs:
+        var.determined_by = None
+        var.walk_strength = Strength.WEAKEST
+        exec_roots.append(variable)
+
+      propagate_walk_strength(old_outputs)
+      unenforcedConstraints = collect_unenforced(old_outputs,constraint.strength,true)
+
+      exec_roots = update_method_graph(unenforcedConstraints,exec_roots)
+      exec_from_roots(exec_roots)
       
 
-  def update_method_graph(self, constraint): 
+  def update_method_graph(self, unenforcedConstraints, exec_roots=[]): 
     pass
 
   def exec_from_roots(self, exec_roots):
     pass
+
+  def propagate_walk_strength(self, variables):
+    pass
+
+  def collect_unenforced(self, old_outputs, strength, booleanValue):
+    pass
+
