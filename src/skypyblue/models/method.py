@@ -27,8 +27,9 @@ class Method:
     return self.in_vars
 
   def execute(self):
-    out_values = self.method(*[var.value for var in self.in_vars])
-    if not isinstance(out_values, list):
-      out_values = [out_values]
-    for i in range(len(self.out_vars)):
-      self.out_vars[i].value = out_values[i]
+    out = self.method(*[var.value for var in self.in_vars])
+    if(len(self.out_vars)==1):
+      self.out_vars[0].value = out;
+    else:
+      for i in range(len(self.out_vars)):
+        self.out_vars[i].value = out_values[i]
