@@ -1,5 +1,5 @@
 import unittest
-from models.variable import Variable
+from models import Variable
 
 class VariableTest(unittest.TestCase):
   """

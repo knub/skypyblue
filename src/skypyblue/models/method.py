@@ -13,6 +13,14 @@ class Method:
       method2 = Method([v1, v2], [v3, v4], 
         lambda v1, v2: v1+v2, v1-v2)
     """
-    self.in_vars = in_vars
-    self.out_vars = out_vars
+    self.in_vars = in_vars if isinstance(out_vars, list) else [out_vars]
+    self.out_vars = out_vars if isinstance(out_vars, list) else [out_vars]
     self.method = method
+
+  @property
+  def outputs(self):
+    return self.out_vars
+
+  @property
+  def inputs(self):
+    return self.in_vars
