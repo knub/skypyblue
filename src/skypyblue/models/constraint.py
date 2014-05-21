@@ -16,8 +16,8 @@ class Constraint:
     """
     self.check_function = check_function
     self.strength = strength
-    self.variables = variables
-    self.methods = methods
+    self.variables = variables if isinstance(variables, list) else [variables]
+    self.methods = methods if isinstance(methods, list) else [methods]
 
     self.selected_method = None
     self.mark = None
