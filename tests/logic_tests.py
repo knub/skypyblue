@@ -46,8 +46,6 @@ class MVineTests(TestCase):
     v2 = Variable("v2", 2, Strength.WEAK)
     v3 = Variable("v3", 3, Strength.WEAK)
 
-    # case 1 - v3's mark is not the same as passed to mvine_revoke_cn
-    
     m = Method([v1, v2], v3, None)
     cn.selected_method = m
     v3.determined_by = m
@@ -80,6 +78,26 @@ class MVineTests(TestCase):
     self.assertTrue (v3.determined_by is m)
     self.assertTrue (v3 not in redetermined_vars)
     self.assertTrue (cn.selected_method is None)    
+
+  # mvine_revoke_cn(cn, Strength.WEAKEST, new_mark(), [], [])
+  def test_mvine_grow_with_empty_stack(self):
+    self.assertTrue(mvine_grow(Strength.WEAKEST, new_mark(), [], []))
+
+  def test_mvine_grow_with_marked_constraints(self):
+    mark = new_mark()
+    cn1 = Constraint(None, Strength.WEAKEST, [], [])
+    cn2 = Constraint(None, Strength.WEAKEST, [], [])
+    cn1.mark = mark
+    cn2.mark = mark
+    self.assertTrue(mvine_grow(Strength.WEAKEST, mark, [cn1, cn2], []))
+
+  def test_mvine_grow_with_unmarked_and_weak_constraints(self):
+    mark = new_mark()
+    cn1 = Constraint(None, Strength.WEAKEST, [], [])
+    cn2 = Constraint(None, Strength.WEAKEST, [], [])
+    cn1.mark = mark
+    logic.mvine_revoke_cn = MagicMock(return_value = False)
+    self.assertFalse(mvine_grow(Strength.MEDIUM, new_mark(), [cn2, cn1], []))
     
   # a valid constraint system should not contain method conflicts
   def check_constraint_system(self, constraint_system):
