@@ -26,24 +26,60 @@ class HelperTests(TestCase):
       used_marks.add(mark)
 
 class MVineTests(TestCase):
-  def test_mvine_revoke_cn(self):
+  def test_mvine_revoke_cn_failed(self):
+    logic.mvine_grow = MagicMock(return_value = False)
     cn = Constraint(None, Strength.WEAKEST, [], [])
     cn.mark = new_mark()
-    logic.mvine_grow = MagicMock(return_value = False)
+
     not_revoked = mvine_revoke_cn(cn, Strength.WEAKEST, new_mark(), [], [])
+    
     self.assertFalse(not_revoked)
     self.assertTrue(cn.mark is None)
 
+
+  def test_mvine_revoke_cn_succeeded(self):
     logic.mvine_grow = MagicMock(return_value = True)
+
+
     cn = Constraint(None, Strength.WEAKEST, [], [])
     v1 = Variable("v1", 1, Strength.WEAK)
     v2 = Variable("v2", 2, Strength.WEAK)
     v3 = Variable("v3", 3, Strength.WEAK)
-    cn.selected_method = Method([v1, v2], v3, None)
+
+    # case 1 - v3's mark is not the same as passed to mvine_revoke_cn
     
+    m = Method([v1, v2], v3, None)
+    cn.selected_method = m
+    v3.determined_by = m
+    redetermined_vars = []
 
-  # mvine_revoke_cn(cn, Strength.WEAKEST, new_mark(), [], [])
+    not_revoked = mvine_revoke_cn(cn, Strength.WEAKEST, new_mark(), [], redetermined_vars)
+    
+    self.assertTrue (not_revoked)
+    self.assertEqual(Strength.WEAK, v1.walk_strength)
+    self.assertEqual(Strength.WEAK, v2.walk_strength)
+    self.assertEqual(Strength.WEAKEST, v3.walk_strength)
+    self.assertTrue (v3.determined_by is None)
+    self.assertTrue (v3 in redetermined_vars)
+    self.assertTrue (cn.selected_method is None)
 
+    # case 2 - v3's mark is the same as passed to mvine_revoke_cn
+    
+    mark = new_mark()
+    cn.selected_method = m
+    v3.walk_strength = Strength.WEAK
+    v3.determined_by = m
+    v3.mark = mark
+    redetermined_vars = []
+    not_revoked = mvine_revoke_cn(cn, Strength.WEAKEST, mark, [], redetermined_vars)
+
+    self.assertTrue (not_revoked)
+    self.assertEqual(Strength.WEAK, v1.walk_strength)
+    self.assertEqual(Strength.WEAK, v2.walk_strength)
+    self.assertEqual(Strength.WEAK, v3.walk_strength)
+    self.assertTrue (v3.determined_by is m)
+    self.assertTrue (v3 not in redetermined_vars)
+    self.assertTrue (cn.selected_method is None)    
     
   # a valid constraint system should not contain method conflicts
   def check_constraint_system(self, constraint_system):
