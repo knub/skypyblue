@@ -31,9 +31,8 @@ class ConstraintSystem:
     if constraint.is_enforced():
       old_outputs = constraint.selected_method.outputs
       constraint.selected_method = None
-
+      
       exec_roots = []
-
       for variable in old_outputs:
         var.determined_by = None
         var.walk_strength = Strength.WEAKEST
