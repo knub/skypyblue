@@ -182,7 +182,7 @@ class ConstraintSystem:
       min_strength = cn.strength
       for mt in cn.methods:
         if not out_var in mt.outputs:
-          max_strength = self.max_out(mt, current_outputs)
+          max_strength = max_out(mt, current_outputs)
           if Strength.weaker(max_strength, min_strength):
             min_strength = max_strength
       out_var.walk_strength = min_strength
@@ -320,13 +320,13 @@ class ConstraintSystem:
     return self.c
 
 
-  def max_out(self, mt, current_outputs):
-    max_strength = Strength.WEAKEST
-    for var in mt.outputs:
-      if not var in current_outputs and \
-        Strength.weaker(max_strength, var.walk_strength):
-        max_strength = var.walk_strength
-    return max_strength
+def max_out(mt, current_outputs):
+  max_strength = Strength.WEAKEST
+  for var in mt.outputs:
+    if not var in current_outputs and \
+      Strength.weaker(max_strength, var.walk_strength):
+      max_strength = var.walk_strength
+  return max_strength
 
 
 
