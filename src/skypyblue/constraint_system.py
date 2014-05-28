@@ -197,7 +197,7 @@ class ConstraintSystem:
     for cn in var.constraints:
       if cn != var.determined_by and cn.mark != done_mark:
         cn.mark = done_mark
-        if cn.is_enforced:
+        if cn.is_enforced():
           for out_var in cn.selected_method.outputs:
             self.collect_unenforced_mark(unenforced_cns, out_var, collection_strength, collect_equal_strength, done_mark)
         elif Strength.weaker(cn.strength, collection_strength) or \
