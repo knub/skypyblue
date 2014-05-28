@@ -6,7 +6,13 @@ digraph G {
 	node [color="#EEEEEE"]
 	edge [color="#31CEF0"]
 
-	"new_mark" [];
+	"add-constraint" [fillcolor="#73C764"];
+	"remove-constraint" [fillcolor="#73C764"];
+	"new-mark" [fillcolor="#73C764"];
+	"build-mvine" [fillcolor="#73C764"];
+	"mvine-grow" [fillcolor="#73C764"];
+	"mvine-revoke-cn" [fillcolor="#73C764"];
+	"mvine-enforce-cn" [fillcolor="#73C764"];
 
 	"add-constraint" -> "update-method-graph";
 	"add-constraint" -> "exec-from-roots";
@@ -37,7 +43,6 @@ digraph G {
 	"propagate-walk-strength" -> "any-immediate-upstream-cns-marked";
 	"propagate-walk-strength" -> "compute-walkabout-strengths";
 
-	# "compute-walkabout-strengths" -> "max-out";
 
 	"collect-unenforced" -> "new-mark";
 	"collect-unenforced" -> "collect-unenforced-mark";
