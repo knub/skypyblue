@@ -1,4 +1,4 @@
-
+import inspect
 class Constraint:
   def __init__(self, check_function, strength, variables, methods):
     """
@@ -25,3 +25,11 @@ class Constraint:
   def is_enforced(self):
     "returns True is there is is a method selected, otherwise False"
     return not self.selected_method is None
+
+  def __str__(self):
+    return "<Constraint check: %s>" % (
+      inspect.getsource(self.check_function).strip())
+
+  def __repr__(self):
+    return str(self)
+
