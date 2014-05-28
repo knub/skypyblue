@@ -1,10 +1,16 @@
-import pygame, math
+import pygame, math, sys
+sys.path.append("../src")
 
-p1 = [250, 100]
-p2 = [600, 400]
-p3 = [200, 400]
+from skypyblue.constraint_system import ConstraintSystem
 
-all_points = [p1,p2,p3]
+cs = ConstraintSystem()
+p1_var = cs.create_variable("p1", [250, 100])
+p2_var = cs.create_variable("p2", [600, 400])
+p3_var = cs.create_variable("p3", [200, 400])
+
+def all_points(): 
+  return [p1_var, p2_var, p3_var]
+  # return [p.get_value() for p in [p1_var, p2_var, p3_var]]
 
 WHITE = (255,255,255)
 BLACK = (0,0,0)
@@ -44,11 +50,10 @@ def quit_on_escape(event):
 def handle_mouse_event(event):
   global LAST_MOUSE_POS, CURRENT_POINT
   mouse_pos = pygame.mouse.get_pos()
-  if event.type == pygame.MOUSEMOTION: 
+  if event.type == pygame.MOUSEMOTION:
     if CURRENT_POINT:
       delta = diff2d(mouse_pos, LAST_MOUSE_POS or mouse_pos)
-      CURRENT_POINT[0] += delta[0]
-      CURRENT_POINT[1] += delta[1]
+      CURRENT_POINT.set_value([CURRENT_POINT.get_value()[0] + delta[0], CURRENT_POINT.get_value()[1] + delta[1]])
     LAST_MOUSE_POS = mouse_pos
   elif event.type == pygame.MOUSEBUTTONDOWN: 
     CURRENT_POINT = get_nearest_pt(mouse_pos)
@@ -63,18 +68,23 @@ def get_nearest_pt(mouse_pos):
     dx = p1[0]-p2[0]
     dy = p1[1]-p2[1]
     return math.sqrt(dx*dx+dy*dy)
-  diffs = [(diff(mouse_pos, pt), pt) for pt in all_points]
+  diffs = [(diff(mouse_pos, pt.get_value()), pt) for pt in all_points()]
   min_diff = min(diffs, key = lambda x: x[0])
   if min_diff[0] < 10: return min_diff[1]
   return None
 
 
 def draw_lines(surface):
-  pygame.draw.aalines(surface, WHITE, False, all_points)
-  for pt in all_points:
+  pts = [p.get_value() for p in all_points()]
+  pygame.draw.aalines(surface, WHITE, False, pts)
+  for pt in pts:
     pygame.draw.circle(surface, WHITE, pt, 5)
   pygame.display.update()
 
+def create_constraints():
+  pass
+
 if __name__ == '__main__':
+  create_constraints()
   # Unsere Main-Funktion aufrufen.
   main()
