@@ -5,7 +5,7 @@ except ImportError as e:
   raise e
 
 class Strength(IntEnum):
-  WEAKEST, WEAK, MEDIUM, STRONG, REQUIRED = range(5)
+  WEAKEST, WEAK, MEDIUM, STRONG, REQUIRED, FORCED = range(6)
 
   @staticmethod
   def weaker(strength1, strength2):

@@ -1,4 +1,4 @@
-from models import Variable, Strength, Constraint
+from models import Variable, Method, Constraint, Strength
 import pdb;
 
 class ConstraintSystem:
@@ -12,6 +12,18 @@ class ConstraintSystem:
     variable = Variable(name, initialValue, self)
     self.variables.append(variable)
     return variable
+
+  def variable_changed(self, var):
+    m = Method([], [var],
+      lambda: var.value)
+
+    cn = Constraint(
+      lambda x: x == var.value,
+      Strength.FORCED, 
+      [var], 
+      [m])
+
+    self.add_constraint(cn)
 
   def add_constraint(self, constraint):
     constraint.selected_method = None

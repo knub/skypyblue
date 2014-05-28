@@ -16,6 +16,8 @@ class Variable:
 
   def set_value(self, value):
     self.value = value
+    if self.system is not None:
+      self.system.variable_changed(self)
 
   def remove_constraint(self,constraint):
       self.constraints=[cn for cn in self.constraints if cn!=constraint]
