@@ -4,10 +4,10 @@ try:
 except ImportError as e:
   from mock import Mock
 
-from constraint_system import ConstraintSystem, max_out
+from marker import Marker
 from models import *
 
-new_mark = ConstraintSystem().new_mark
+new_mark = Marker().new_mark
 
 class MVineTests(TestCase):
   
