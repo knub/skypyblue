@@ -51,8 +51,7 @@ class MidpointTestClass(unittest.TestCase):
     self.assertTrue(midpoint.isMidpoint(point1,point2))
 
   def test_change_point1(self):
-    self.point1.set_value(Point(0,0))
-    self.constraint_system.exec_from_roots([self.point1])
+    self.point1.set_value(Point(0, 0))
     point1 = self.point1.get_value()
     self.test_contraint()
     self.assertEqual(point1.X, 0)
@@ -60,8 +59,7 @@ class MidpointTestClass(unittest.TestCase):
 
   @unittest.skip
   def test_change_midpoint(self):
-    self.midpoint.set_value(Point(0,0))
-    self.constraint_system.exec_from_roots([self.midpoint])
+    self.midpoint.set_value(Point(0, 0))
     midpoint = self.midpoint.get_value()
     self.test_contraint()
     self.assertEqual(midpoint.X, 0)
