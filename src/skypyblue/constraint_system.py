@@ -1,4 +1,4 @@
-from models import Variable, Method, Constraint, Strength
+from models import Variable, Method, Constraint, Strength, InternalStrength
 import pdb;
 
 class ConstraintSystem:
@@ -20,7 +20,7 @@ class ConstraintSystem:
 
     cn = Constraint(
       lambda x: x == var.value,
-      Strength.FORCED, 
+      InternalStrength.FORCED,
       [var], 
       [m])
 
