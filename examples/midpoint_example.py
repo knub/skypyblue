@@ -2,21 +2,24 @@ import pygame, math, sys
 sys.path.append("../src")
 
 from skypyblue.constraint_system import ConstraintSystem
+from skypyblue.models import Method, Constraint, Strength
 
 cs = ConstraintSystem()
 p1_var = cs.create_variable("p1", [250, 100])
-p2_var = cs.create_variable("p2", [600, 400])
-p3_var = cs.create_variable("p3", [200, 400])
+pmid_var = cs.create_variable("mid", [600, 400])
+p2_var = cs.create_variable("p2", [200, 400])
 
 def all_points(): 
-  return [p1_var, p2_var, p3_var]
-  # return [p.get_value() for p in [p1_var, p2_var, p3_var]]
+  return [p1_var, pmid_var, p2_var]
 
 WHITE = (255,255,255)
 BLACK = (0,0,0)
 
 LAST_MOUSE_POS = None
 CURRENT_POINT = None
+
+def is_midpoint(p1, p2, pmid):
+  return pmid[0] == (p1[0] + p2[0])/2 and pmid[1] == (p1[1] + p2[1])/2
 
 def main():
   pygame.init()
@@ -64,7 +67,7 @@ def diff2d(p1, p2):
   return p1[0]-p2[0], p1[1]-p2[1]    
 
 def get_nearest_pt(mouse_pos):
-  def diff(p1, p2): 
+  def diff(p1, p2):
     dx = p1[0]-p2[0]
     dy = p1[1]-p2[1]
     return math.sqrt(dx*dx+dy*dy)
@@ -82,7 +85,23 @@ def draw_lines(surface):
   pygame.display.update()
 
 def create_constraints():
-  pass
+  mMp = Method([p1_var, p2_var], [pmid_var],
+    lambda p1, p2: [(p1[0]+p2[0])/2, (p1[1]+p2[1])/2])
+
+  mP1 = Method([pmid_var, p2_var], [p1_var],
+    lambda pmid, p2: [(2*pmid[0] - p2[0])/2 , (2*pmid[1] - p2[1])/2])
+
+  mP2 = Method([pmid_var, p1_var], [p2_var],
+    lambda pmid, p1: [(2*pmid[0] - p1[0])/2 , (2*pmid[1] - p1[1])/2])
+
+
+  constraint = Constraint(
+    lambda p1, p2, pmid: is_midpoint(p1, p2, pmid),
+    Strength.STRONG,
+    [p1_var, p2_var, pmid_var],
+    [mMp, mP1, mP2])
+
+  cs.add_constraint(constraint)
 
 if __name__ == '__main__':
   create_constraints()
