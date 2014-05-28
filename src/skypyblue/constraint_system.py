@@ -97,7 +97,7 @@ class ConstraintSystem:
 
   def mvine_revoke_cn(self, cn, root_strength, done_mark, mvine_stack, redetermined_vars):
     cn.mark = done_mark
-    ok = self.mvine_grow(root_strength, done_mark, mvine_stack)
+    ok = self.mvine_grow(root_strength, done_mark, mvine_stack, redetermined_vars)
     if ok:
       for var in cn.selected_method.outputs:
         if var.mark != done_mark:
