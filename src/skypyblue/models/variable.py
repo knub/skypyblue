@@ -1,7 +1,7 @@
 from models.strengths import *
 
 class Variable:
-  def __init__(self, name, value, walk_strength = Strength.WEAKEST):
+  def __init__(self, name, value, system = None, walk_strength = Strength.WEAKEST):
     self.name = name
     self.value = value
     self.constraints = []
@@ -9,6 +9,7 @@ class Variable:
     self.walk_strength = walk_strength
     self.mark = None
     self.valid = True
+    self.system = system
 
   def get_value(self):
     return self.value

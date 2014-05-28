@@ -9,7 +9,7 @@ class ConstraintSystem:
     self.variables = []
 
   def create_variable(self, name, initialValue):
-    variable = Variable(name, initialValue)
+    variable = Variable(name, initialValue, self)
     self.variables.append(variable)
     return variable
 
@@ -19,7 +19,6 @@ class ConstraintSystem:
 
     for variable in constraint.variables:
       variable.add_constraint(constraint)
-    #pdb.set_trace()
     exec_roots = []
     self.update_method_graph([constraint], exec_roots)
     self.exec_from_roots(exec_roots)

@@ -44,9 +44,9 @@ class MVineTests(TestCase):
 
 
     cn = Constraint(None, Strength.WEAKEST, [], [])
-    v1 = Variable("v1", 1, Strength.WEAK)
-    v2 = Variable("v2", 2, Strength.WEAK)
-    v3 = Variable("v3", 3, Strength.WEAK)
+    v1 = Variable("v1", 1, walk_strength = Strength.WEAK)
+    v2 = Variable("v2", 2, walk_strength = Strength.WEAK)
+    v3 = Variable("v3", 3, walk_strength = Strength.WEAK)
 
     m = Method([v1, v2], v3, None)
     cn.selected_method = m
