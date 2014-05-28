@@ -71,9 +71,22 @@ class MidpointTestClass(unittest.TestCase):
   def test_change_several_points(self):
     self.midpoint.set_value(Point(0,0))
     self.point1.set_value(Point(10,10))
-    self.point2.set_value(Point(10,10))
-    point2 = self.point1.get_value()
+    self.point2.set_value(Point(50,50))
+    point2 = self.point2.get_value()
     self.test_contraint()
-    self.assertEqual(point2.X, 10)
-    self.assertEqual(point2.Y, 10)
+    self.assertEqual(point2.X, 50)
+    self.assertEqual(point2.Y, 50)
+
+  def test_change_two_points_at_the_same_time(self):
+    self.constraint_system.change_variable_values(
+        [self.point1, self.point2],
+        [Point(0,0), Point(20,20)]
+      )
+    point1 = self.point1.get_value()
+    point2 = self.point2.get_value()
+    self.test_contraint()
+    self.assertEqual(point1.X, 0)
+    self.assertEqual(point1.Y, 0)
+    self.assertEqual(point2.X, 20)
+    self.assertEqual(point2.Y, 20)
 

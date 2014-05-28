@@ -14,14 +14,17 @@ class ConstraintSystem:
     self.variables.append(variable)
     return variable
 
-  def variable_changed(self, var):
-    m = Method([], [var],
-      lambda: var.value)
+  def change_variable_values(self, variables, values):
+    if len(variables)==1:
+      values = values[0]
+      
+    m = Method([], variables,
+      lambda: values)
 
     cn = Constraint(
-      lambda x: x == var.value,
+      lambda x: True,
       Strength.FORCED, 
-      [var], 
+      variables, 
       [m])
 
     if self.forced_constraint is not None:
@@ -29,6 +32,10 @@ class ConstraintSystem:
 
     self.forced_constraint = cn
     self.add_constraint(cn)
+
+
+  def variable_changed(self, var):
+    self.change_variable_values([var], [var.value])
 
   def add_constraint(self, constraint):
     constraint.selected_method = None

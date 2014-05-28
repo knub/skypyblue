@@ -32,4 +32,4 @@ class Method:
       self.out_vars[0].value = out;
     else:
       for i in range(len(self.out_vars)):
-        self.out_vars[i].value = out_values[i]
+        self.out_vars[i].value = out[i]
