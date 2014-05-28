@@ -50,7 +50,7 @@ class ConstraintSystem:
         exec_roots.append(variable)
 
       self.propagate_walk_strength(old_outputs)
-      unenforcedConstraints = self.collect_unenforced(old_outputs,constraint.strength,true)
+      unenforced_constraints = self.collect_unenforced(old_outputs,constraint.strength,true)
 
       exec_roots = self.update_method_graph(unenforcedConstraints,exec_roots)
       self.exec_from_roots(exec_roots)
@@ -59,7 +59,8 @@ class ConstraintSystem:
   def update_method_graph(self, unenforced_constraints, exec_roots): 
     while unenforced_constraints:
       cn = self.strongest_constraint(unenforced_constraints)
-      unenforced_constraints.remove(cn)
+      unenforced_constraints = list(
+        filter(lambda c: c != cn, unenforced_constraints))
       redetermined_vars = []
       ok = self.build_mvine(cn, redetermined_vars)
       if not ok: return
@@ -71,7 +72,7 @@ class ConstraintSystem:
           exec_roots.append(var)
 
   def strongest_constraint(self, constraints):
-    constraints.sort(key=lambda cn: cn.strength, reverse=True)
+    constraints.sort(key = lambda cn: cn.strength, reverse = True)
     return constraints[0]
 
   def weakest_constraint(self, constraints):
