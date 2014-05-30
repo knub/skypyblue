@@ -1,4 +1,4 @@
-from models import Variable, Method, Constraint, Strength
+from models import Variable, Method, Constraint, Strength, InternalStrength
 import pdb;
 
 class ConstraintSystem:
@@ -7,23 +7,35 @@ class ConstraintSystem:
     self.c = 0
     self.constraints = []
     self.variables = []
+    self.forced_constraint = None
 
   def create_variable(self, name, initialValue):
     variable = Variable(name, initialValue, self)
     self.variables.append(variable)
     return variable
 
-  def variable_changed(self, var):
-    m = Method([], [var],
-      lambda: var.value)
+  def change_variable_values(self, variables, values):
+    if len(variables)==1:
+      values = values[0]
+      
+    m = Method([], variables,
+      lambda: values)
 
     cn = Constraint(
-      lambda x: x == var.value,
-      Strength.FORCED, 
-      [var], 
+      lambda x: True,
+      InternalStrength.FORCED,
+      variables, 
       [m])
 
+    if self.forced_constraint is not None:
+      self.remove_constraint(self.forced_constraint)
+
+    self.forced_constraint = cn
     self.add_constraint(cn)
+
+
+  def variable_changed(self, var):
+    self.change_variable_values([var], [var.value])
 
   def add_constraint(self, constraint):
     constraint.selected_method = None
@@ -45,21 +57,23 @@ class ConstraintSystem:
       
       exec_roots = []
       for variable in old_outputs:
-        var.determined_by = None
-        var.walk_strength = Strength.WEAKEST
+        variable.determined_by = None
+        variable.walk_strength = Strength.WEAKEST
         exec_roots.append(variable)
 
       self.propagate_walk_strength(old_outputs)
-      unenforcedConstraints = self.collect_unenforced(old_outputs,constraint.strength,true)
-
-      exec_roots = self.update_method_graph(unenforcedConstraints,exec_roots)
+      unenforcedConstraints = []
+      self.collect_unenforced(unenforcedConstraints, old_outputs,constraint.strength,True)
+      exec_roots = []
+      self.update_method_graph(unenforcedConstraints,exec_roots)
       self.exec_from_roots(exec_roots)
       
 
   def update_method_graph(self, unenforced_constraints, exec_roots): 
     while unenforced_constraints:
       cn = self.strongest_constraint(unenforced_constraints)
-      unenforced_constraints.remove(cn)
+      unenforced_constraints = list(
+        filter(lambda c: c != cn, unenforced_constraints))
       redetermined_vars = []
       ok = self.build_mvine(cn, redetermined_vars)
       if not ok: return
@@ -71,7 +85,7 @@ class ConstraintSystem:
           exec_roots.append(var)
 
   def strongest_constraint(self, constraints):
-    constraints.sort(key=lambda cn: cn.strength, reverse=True)
+    constraints.sort(key = lambda cn: cn.strength, reverse = True)
     return constraints[0]
 
   def weakest_constraint(self, constraints):
