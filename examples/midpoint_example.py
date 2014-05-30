@@ -89,10 +89,10 @@ def create_constraints():
     lambda p1, p2: [(p1[0]+p2[0])/2, (p1[1]+p2[1])/2])
 
   mP1 = Method([pmid_var, p2_var], [p1_var],
-    lambda pmid, p2: [(2*pmid[0] - p2[0])/2 , (2*pmid[1] - p2[1])/2])
+    lambda pmid, p2: [(2*pmid[0] - p2[0]) , (2*pmid[1] - p2[1])])
 
   mP2 = Method([pmid_var, p1_var], [p2_var],
-    lambda pmid, p1: [(2*pmid[0] - p1[0])/2 , (2*pmid[1] - p1[1])/2])
+    lambda pmid, p1: [(2*pmid[0] - p1[0]) , (2*pmid[1] - p1[1])])
 
 
   constraint = Constraint(
