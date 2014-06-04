@@ -5,6 +5,7 @@ except ImportError as e:
   from mock import Mock
 
 from marker import Marker
+from constraint_system import ConstraintSystem
 from models import *
 
 new_mark = Marker().new_mark
@@ -18,7 +19,7 @@ class HelperTests(TestCase):
     v2 = cs.create_variable("v2", 12)
     method = Method(v1, v2, lambda v1: v1-1)
 
-    self.assertEqual(Strength.WEAKEST, max_out(method, [v1]))
+    self.assertEqual(Strength.WEAKEST, cs.max_out(method, [v1]))
 
   def test_new_mark_are_numbers(self):
     used_marks = set()

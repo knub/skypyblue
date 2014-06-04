@@ -6,27 +6,30 @@ except ImportError as e:
 
 from marker import Marker
 from models import *
+from mvine import Mvine
+from constraint_system import ConstraintSystem
 
 new_mark = Marker().new_mark
 
 class MVineTests(TestCase):
   
   def setUp(self):
+    self.marker = Marker();
+    self.mvine = Mvine(self.marker)
     self.cs = ConstraintSystem()
 
   def test_mvine_revoke_cn_fails(self):
-    self.cs.mvine_grow = Mock(return_value = False)
+    self.mvine.grow = Mock(return_value = False)
     cn = Constraint(None, Strength.WEAKEST, [], [])
     cn.mark = new_mark()
 
-    not_revoked = self.cs.mvine_revoke_cn(cn, Strength.WEAKEST, new_mark(), [], [])
+    not_revoked = self.mvine.revoke_cn(cn, Strength.WEAKEST, self.marker.new_mark(), [], [])
     
     self.assertFalse(not_revoked)
     self.assertTrue(cn.mark is None)
 
   def test_mvine_revoke_cn_succeeds(self):
     self.cs.mvine_grow = Mock(return_value = True)
-
 
     cn = Constraint(None, Strength.WEAKEST, [], [])
     v1 = self.cs.create_variable("v1", 1)
@@ -39,7 +42,7 @@ class MVineTests(TestCase):
     v3.determined_by = m
     redetermined_vars = []
 
-    not_revoked = self.cs.mvine_revoke_cn(cn, Strength.WEAKEST, new_mark(), [], redetermined_vars)
+    not_revoked = self.mvine.revoke_cn(cn, Strength.WEAKEST, new_mark(), [], redetermined_vars)
     
     self.assertTrue (not_revoked)
     self.assertEqual(Strength.WEAK, v1.walk_strength)
@@ -57,7 +60,7 @@ class MVineTests(TestCase):
     v3.determined_by = m
     v3.mark = mark
     redetermined_vars = []
-    not_revoked = self.cs.mvine_revoke_cn(cn, Strength.WEAKEST, mark, [], redetermined_vars)
+    not_revoked = self.mvine.revoke_cn(cn, Strength.WEAKEST, mark, [], redetermined_vars)
 
     self.assertTrue (not_revoked)
     self.assertEqual(Strength.WEAK, v1.walk_strength)
@@ -69,7 +72,7 @@ class MVineTests(TestCase):
 
   # mvine_revoke_cn(cn, Strength.WEAKEST, new_mark(), [], [])
   def test_mvine_grow_with_empty_stack(self):
-    self.assertTrue(self.cs.mvine_grow(Strength.WEAKEST, new_mark(), [], []))
+    self.assertTrue(self.mvine.grow(Strength.WEAKEST, new_mark(), [], []))
 
   def test_mvine_grow_with_marked_constraints(self):
     mark = new_mark()
@@ -82,27 +85,27 @@ class MVineTests(TestCase):
     mark = new_mark()
     cn1 = Constraint(None, Strength.WEAKEST, [], [])
     cn2 = Constraint(None, Strength.WEAKEST, [], [])
-    self.cs.mvine_revoke_cn = Mock(return_value = True)
-    self.cs.mvine_revoke_cn = Mock(return_value = False)
+    self.mvine.revoke_cn = Mock(return_value = True)
+    self.mvine.revoke_cn = Mock(return_value = False)
     stack = [cn2, cn1]
-    self.assertFalse(self.cs.mvine_grow(Strength.MEDIUM, mark, stack, []))
+    self.assertFalse(self.mvine.grow(Strength.MEDIUM, mark, stack, []))
 
   def test_mvine_grow_with_(self):
     mark = new_mark()
     cn1 = Constraint(None, Strength.WEAKEST, [], [])
     cn2 = Constraint(None, Strength.REQUIRED, [], [])
     cn1.mark = mark
-    self.cs.mvine_enforce_cn = Mock(return_value = False)
+    self.mvine.enforce_cn = Mock(return_value = False)
     stack = [cn2, cn1]
-    self.assertFalse(self.cs.mvine_grow(Strength.MEDIUM, mark, stack, []))
+    self.assertFalse(self.mvine.grow(Strength.MEDIUM, mark, stack, []))
     
 
   def test_mvine_enforce_cn_with_no_methods_fails(self):
     cn = Constraint(None, Strength.WEAKEST, [], [])
     cn.mark = new_mark()
-    self.cs.possible_method = Mock(return_value = False)
+    self.mvine.possible_method = Mock(return_value = False)
 
-    self.assertFalse(self.cs.mvine_enforce_cn(cn, Strength.WEAKEST, new_mark(), [], []))
+    self.assertFalse(self.mvine.enforce_cn(cn, Strength.WEAKEST, new_mark(), [], []))
     self.assertTrue(cn.mark is None)
 
   def test_mvine_enforce_cn_fails(self):
@@ -112,9 +115,9 @@ class MVineTests(TestCase):
     m = Method([v1, v2], v3, None)
     cn = Constraint(None, Strength.WEAKEST, [], m)
     cn.mark = new_mark()
-    self.cs.possible_method = Mock(return_value = False)
+    self.mvine.possible_method = Mock(return_value = False)
 
-    self.assertFalse(self.cs.mvine_enforce_cn(cn, Strength.WEAKEST, new_mark(), [], []))
+    self.assertFalse(self.mvine.enforce_cn(cn, Strength.WEAKEST, new_mark(), [], []))
     self.assertTrue(cn.mark is None)
 
 
