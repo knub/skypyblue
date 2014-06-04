@@ -1,5 +1,5 @@
 import unittest
-from models import Variable
+from skypyblue.models import Variable
 
 class VariableTest(unittest.TestCase):
   """

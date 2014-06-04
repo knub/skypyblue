@@ -1,5 +1,5 @@
-from constraint_system import ConstraintSystem
-from models import Variable, Strength, Constraint, Variable
+from skypyblue.constraint_system import ConstraintSystem
+from skypyblue.models import Variable, Strength, Constraint, Variable
 
 class Fixture:
   def __init__(self):

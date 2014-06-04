@@ -1,6 +1,6 @@
 import unittest
-from constraint_system import ConstraintSystem
-from models import Constraint, Strength
+from skypyblue.constraint_system import ConstraintSystem
+from skypyblue.models import Constraint, Strength
 
 class ConstraintSystemTest(unittest.TestCase):
   """

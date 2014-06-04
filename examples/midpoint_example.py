@@ -86,7 +86,7 @@ def draw_lines(surface):
 
 def create_constraints():
   mMp = Method([p1_var, p2_var], [pmid_var],
-    lambda p1, p2: [(p1[0]+p2[0])/2, (p1[1]+p2[1])/2])
+    lambda p1, p2: [int((p1[0]+p2[0])/2), int((p1[1]+p2[1])/2)])
 
   mP1 = Method([pmid_var, p2_var], [p1_var],
     lambda pmid, p2: [(2*pmid[0] - p2[0]) , (2*pmid[1] - p2[1])])
@@ -100,7 +100,6 @@ def create_constraints():
     Strength.STRONG,
     [p1_var, p2_var, pmid_var],
     [mMp, mP1, mP2])
-
   cs.add_constraint(constraint)
 
 if __name__ == '__main__':

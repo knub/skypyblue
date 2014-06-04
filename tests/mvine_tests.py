@@ -4,8 +4,8 @@ try:
 except ImportError as e:
   from mock import Mock
 
-from constraint_system import ConstraintSystem, max_out
-from models import *
+from skypyblue.constraint_system import ConstraintSystem, max_out
+from skypyblue.models import *
 
 new_mark = ConstraintSystem().new_mark
 

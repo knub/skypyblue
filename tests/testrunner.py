@@ -8,7 +8,7 @@ Usage:
 if __name__ != "__main__": exit()
 
 import unittest, sys
-sys.path.append("../src/skypyblue")
+sys.path.append("../src")
 
 
 from constraint_system_tests import *

@@ -1,5 +1,5 @@
 
-from models import Variable
+from skypyblue.models import Variable
 class Method:
   def __init__(self, in_vars, out_vars, method):    
     """

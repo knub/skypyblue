@@ -1,4 +1,4 @@
-from models import Variable, Method, Constraint, Strength, InternalStrength
+from skypyblue.models import Variable, Method, Constraint, Strength, InternalStrength
 import pdb;
 
 class ConstraintSystem:
@@ -8,6 +8,7 @@ class ConstraintSystem:
     self.constraints = []
     self.variables = []
     self.forced_constraint = None
+
 
   def create_variable(self, name, initialValue):
     variable = Variable(name, initialValue, self)
@@ -220,13 +221,16 @@ class ConstraintSystem:
     return unenforced_cns
 
   def exec_from_roots(self, exec_roots):
+    # print("-"*10)
     prop_mark = self.new_mark()
     exec_pplan = []
+    # print([[isinstance(cn, Constraint), cn] for cn in exec_roots])
 
     for cn in exec_roots:
       if isinstance(cn, Constraint):
-        exec_pplan.extend(self.pplan_add(exec_pplan, cn, prop_mark))
-
+        res = self.pplan_add(exec_pplan, cn, prop_mark)
+        exec_pplan.extend(res)
+    # print("="*10)
     for var in exec_roots:
       if isinstance(var, Variable):
         if var.determined_by == None and not var.valid:

@@ -1,4 +1,4 @@
-from models.strengths import *
+from skypyblue.models.strengths import *
 
 class Variable:
   def __init__(self, name, value, system = None, walk_strength = Strength.WEAKEST):
