@@ -43,8 +43,7 @@ class ConstraintSystem:
 
     for variable in constraint.variables:
       variable.add_constraint(constraint)
-    exec_roots = []
-    self.update_method_graph([constraint], exec_roots)
+    exec_roots = self.update_method_graph([constraint])
     self.exec_from_roots(exec_roots)
 
   def remove_constraint(self, constraint):
@@ -64,25 +63,27 @@ class ConstraintSystem:
       self.propagate_walk_strength(old_outputs)
       unenforcedConstraints = []
       self.collect_unenforced(unenforcedConstraints, old_outputs,constraint.strength,True)
-      exec_roots = []
-      self.update_method_graph(unenforcedConstraints,exec_roots)
+      exec_roots = self.update_method_graph(unenforcedConstraints)
       self.exec_from_roots(exec_roots)
       
 
-  def update_method_graph(self, unenforced_constraints, exec_roots): 
+  def update_method_graph(self, unenforced_constraints): 
+    exec_roots = []
     while unenforced_constraints:
       cn = self.strongest_constraint(unenforced_constraints)
       unenforced_constraints = list(
         filter(lambda c: c != cn, unenforced_constraints))
       redetermined_vars = []
       ok = self.build_mvine(cn, redetermined_vars)
-      if not ok: return
+      if not ok:
+        return exec_roots
       self.propagate_walk_strength([cn] + [redetermined_vars])
       self.collect_unenforced(unenforced_constraints, redetermined_vars, cn.strength, False)
       exec_roots.append(cn)
       for var in redetermined_vars:
         if var.determined_by is None:
           exec_roots.append(var)
+    return exec_roots
 
   def strongest_constraint(self, constraints):
     constraints.sort(key = lambda cn: cn.strength, reverse = True)
@@ -333,7 +334,7 @@ class ConstraintSystem:
 
 
   def new_mark(self):
-    self.c+=1
+    self.c += 1
     return self.c
 
 
