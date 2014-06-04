@@ -3,26 +3,26 @@ class Mvine:
   def __init__(self,marker):
     self.marker = marker
 
-  def build_mvine(self, cn, redetermined_vars):
+  def build(self, cn, redetermined_vars):
     mvine_stack = []
     done_mark = self.marker.new_mark()
-    return self.mvine_enforce_cn(cn, cn.strength, done_mark, mvine_stack, redetermined_vars)
+    return self.enforce_cn(cn, cn.strength, done_mark, mvine_stack, redetermined_vars)
 
-  def mvine_grow(self, root_strength, done_mark, mvine_stack, redetermined_vars):
+  def grow(self, root_strength, done_mark, mvine_stack, redetermined_vars):
     if not mvine_stack: return True
     cn = mvine_stack.pop()
     if cn.mark == done_mark:
-      ok = self.mvine_grow(root_strength, done_mark, mvine_stack, redetermined_vars)
+      ok = self.grow(root_strength, done_mark, mvine_stack, redetermined_vars)
     elif Strength.weaker(cn.strength, root_strength):
-      ok = self.mvine_revoke_cn(cn, root_strength, done_mark, mvine_stack, redetermined_vars)
+      ok = self.revoke_cn(cn, root_strength, done_mark, mvine_stack, redetermined_vars)
     else:
-      ok = self.mvine_enforce_cn(cn, root_strength, done_mark, mvine_stack, redetermined_vars)
+      ok = self.enforce_cn(cn, root_strength, done_mark, mvine_stack, redetermined_vars)
     if not ok: mvine_stack.append(cn)
     return ok
 
-  def mvine_revoke_cn(self, cn, root_strength, done_mark, mvine_stack, redetermined_vars):
+  def revoke_cn(self, cn, root_strength, done_mark, mvine_stack, redetermined_vars):
     cn.mark = done_mark
-    ok = self.mvine_grow(root_strength, done_mark, mvine_stack, redetermined_vars)
+    ok = self.grow(root_strength, done_mark, mvine_stack, redetermined_vars)
     if ok:
       for var in cn.selected_method.outputs:
         if var.mark != done_mark:
@@ -35,7 +35,7 @@ class Mvine:
       cn.mark = None
       return False
 
-  def mvine_enforce_cn(self, cn, root_strength, done_mark, mvine_stack, redetermined_vars):
+  def enforce_cn(self, cn, root_strength, done_mark, mvine_stack, redetermined_vars):
     cn.mark = done_mark
     for mt in cn.methods:
       if self.possible_method(mt, cn, root_strength, done_mark):
@@ -44,7 +44,7 @@ class Mvine:
           mvine_stack.append(new_cn)
         for var in mt.outputs:
           var.mark = done_mark
-        ok = self.mvine_grow(root_strength, done_mark, mvine_stack, redetermined_vars)
+        ok = self.grow(root_strength, done_mark, mvine_stack, redetermined_vars)
         if ok:
           if not cn.selected_method is None:
             for var in cn.selected_method.outputs:
