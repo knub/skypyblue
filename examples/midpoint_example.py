@@ -12,19 +12,19 @@ p2_var = cs.create_variable("p2", [200, 400])
 def all_points(): 
   return [p1_var, pmid_var, p2_var]
 
-WHITE = (255,255,255)
-BLACK = (0,0,0)
+WHITE = (255, 255, 255)
+BLACK = (0, 0, 0)
 
 LAST_MOUSE_POS = None
 CURRENT_POINT = None
 
 def is_midpoint(p1, p2, pmid):
-  return pmid[0] == (p1[0] + p2[0])/2 and pmid[1] == (p1[1] + p2[1])/2
+  return pmid[0] == (p1[0] + p2[0]) / 2 and pmid[1] == (p1[1] + p2[1]) / 2
 
 def main():
   pygame.init()
   surface = pygame.display.set_mode((800, 600))
-  pygame.display.set_caption("Pygame-Tutorial: Grundlagen")
+  pygame.display.set_caption("Constraint-based-Programming: Midpoint Example")
   pygame.mouse.set_visible(1)
   pygame.key.set_repeat(1, 30)
   clock = pygame.time.Clock()
@@ -64,13 +64,13 @@ def handle_mouse_event(event):
     CURRENT_POINT = None
 
 def diff2d(p1, p2):
-  return p1[0]-p2[0], p1[1]-p2[1]    
+  return p1[0] - p2[0], p1[1] - p2[1]    
 
 def get_nearest_pt(mouse_pos):
   def diff(p1, p2):
-    dx = p1[0]-p2[0]
-    dy = p1[1]-p2[1]
-    return math.sqrt(dx*dx+dy*dy)
+    dx = p1[0] - p2[0]
+    dy = p1[1] - p2[1]
+    return math.sqrt(dx * dx + dy * dy)
   diffs = [(diff(mouse_pos, pt.get_value()), pt) for pt in all_points()]
   min_diff = min(diffs, key = lambda x: x[0])
   if min_diff[0] < 10: return min_diff[1]
@@ -86,14 +86,13 @@ def draw_lines(surface):
 
 def create_constraints():
   mMp = Method([p1_var, p2_var], [pmid_var],
-    lambda p1, p2: [int((p1[0]+p2[0])/2), int((p1[1]+p2[1])/2)])
+    lambda p1, p2: [int((p1[0] + p2[0]) / 2), int((p1[1] + p2[1]) / 2)])
 
   mP1 = Method([pmid_var, p2_var], [p1_var],
-    lambda pmid, p2: [(2*pmid[0] - p2[0]) , (2*pmid[1] - p2[1])])
+    lambda pmid, p2: [(2 * pmid[0] - p2[0]) , (2 * pmid[1] - p2[1])])
 
   mP2 = Method([pmid_var, p1_var], [p2_var],
-    lambda pmid, p1: [(2*pmid[0] - p1[0]) , (2*pmid[1] - p1[1])])
-
+    lambda pmid, p1: [(2 * pmid[0] - p1[0]) , (2 * pmid[1] - p1[1])])
 
   constraint = Constraint(
     lambda p1, p2, pmid: is_midpoint(p1, p2, pmid),
@@ -104,5 +103,4 @@ def create_constraints():
 
 if __name__ == '__main__':
   create_constraints()
-  # Unsere Main-Funktion aufrufen.
   main()
