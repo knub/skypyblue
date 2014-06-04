@@ -112,67 +112,44 @@ def create_constraints():
       ]
       )
   )
-  mp1p3p4 = Method([p1_var, p3_var, p4_var], [pm_var, p2_var],
-    lambda p1, p3, p4: (
+  mp1pmp3 = Method([p1_var, pm_var, p3_var], [p2_var, p4_var],
+    lambda p1, pm, p3: (
       [
-        p1[0] + (p4[0] - p3[0]),
-        p1[1] + (p4[1] - p3[1])
+        2 * pm[0] - p1[0],
+        2 * pm[1] - p1[1]
       ],
       [
-        p1[0] + 2 * (p4[0] - p3[0]),
-        p1[1] + 2 * (p4[1] - p3[1])
+        p3[0] + (pm[0] - p1[0]),
+        p3[1] + (pm[1] - p1[1])
       ]
       )
   )
-  mp2p3p4 = Method([p2_var, p3_var, p4_var], [pm_var, p1_var],
-    lambda p2, p3, p4: (
+  mpmp2p4 = Method([pm_var, p2_var, p4_var], [p1_var, p3_var],
+    lambda pm, p2, p4: (
       [
-        p2[0] - (p4[0] - p3[0]),
-        p2[1] - (p4[1] - p3[1])
+        2 * pm[0] - p2[0],
+        2 * pm[1] - p2[1]
       ],
       [
-        p2[0] - 2 * (p4[0] - p3[0]),
-        p2[1] - 2 * (p4[1] - p3[1])
-      ]
-      )
-  )
-  mpmp1p2 = Method([pm_var, p1_var, p2_var], [p3_var, p4_var],
-    lambda p2, p3, p4: (
-      [
-        p2[0] - (p4[0] - p3[0]),
-        p2[1] - (p4[1] - p3[1])
-      ],
-      [
-        p2[0] - 2 * (p4[0] - p3[0]),
-        p2[1] - 2 * (p4[1] - p3[1])
+        p4[0] + (pm[0] - p2[0]),
+        p4[1] + (pm[1] - p2[1])
       ]
       )
   )
 
 
-  constraint1 = Constraint(
-    lambda p1, p2, p3, p4, pmid: is_midpoint(p1, p2, pmid) and
-                         length(p1, pmid) == length(p3, p4),
+  constraint = Constraint(
+    lambda p1, p2, p3, p4, pm: is_midpoint(p1, p2, pm) and
+                         length(p1, pm) == length(p3, p4),
     Strength.STRONG,
-    [pm_var, p1_var, p2_var, p3_var, p4_var],
-    [mpmp3p4, mp1p3p4, mp2p3p4])
-  cs.add_constraint(constraint1)
+    [p1_var, p2_var, p3_var, p4_var,pm_var],
+    [mpmp3p4, mp1pmp3, mpmp2p4])
+  
+  cs.add_constraint(constraint)
 
-  mMp = Method([p1_var, p2_var], [pm_var],
-    lambda p1, p2: [int((p1[0] + p2[0]) / 2), int((p1[1] + p2[1]) / 2)])
-
-  mP1 = Method([pm_var, p2_var], [p1_var],
-    lambda pmid, p2: [(2 * pmid[0] - p2[0]) , (2 * pmid[1] - p2[1])])
-
-  mP2 = Method([pm_var, p1_var], [p2_var],
-    lambda pmid, p1: [(2 * pmid[0] - p1[0]) , (2 * pmid[1] - p1[1])])
-
-  constraint2 = Constraint(
-    lambda p1, p2, pmid: is_midpoint(p1, p2, pmid),
-    Strength.STRONG,
-    [p1_var, p2_var, pm_var],
-    [mMp, mP1, mP2])
-  cs.add_constraint(constraint2)
+  p3_var.stay()
+  p4_var.stay()
+ 
 
 if __name__ == '__main__':
   create_constraints()

@@ -40,6 +40,18 @@ class ConstraintSystem:
   def variable_changed(self, var):
     self.change_variable_values([var], [var.value])
 
+  def add_stay_constraint(self, variable, strength):
+    m = Method([], [variable], lambda: variable.value)
+    stay_constraint = Constraint(
+      lambda x: True,
+      strength,
+      [variable], 
+      [m])
+
+    self.add_constraint(stay_constraint)
+    return stay_constraint;
+
+
   def add_constraint(self, constraint):
     constraint.selected_method = None
     constraint.mark = None
