@@ -5,9 +5,11 @@ from skypyblue.constraint_system import ConstraintSystem
 from skypyblue.models import Method, Constraint, Strength
 
 cs = ConstraintSystem()
-p1_var = cs.create_variable("p1", [250, 100])
 pmid_var = cs.create_variable("mid", [600, 400])
+p1_var = cs.create_variable("p1", [250, 100])
 p2_var = cs.create_variable("p2", [200, 400])
+p3_var = cs.create_variable("p1", [100, 150])
+p4_var = cs.create_variable("p2", [100, 250])
 
 def all_points(): 
   return [p1_var, pmid_var, p2_var]
@@ -20,6 +22,12 @@ CURRENT_POINT = None
 
 def is_midpoint(p1, p2, pmid):
   return pmid[0] == (p1[0] + p2[0]) / 2 and pmid[1] == (p1[1] + p2[1]) / 2
+
+def length(p1, p2):
+  dx = p1[0] - p2[0]
+  dy = p1[1] - p2[1]
+  return math.sqrt(dx * dx + dy * dy)
+
 
 def main():
   pygame.init()
@@ -67,11 +75,7 @@ def diff2d(p1, p2):
   return p1[0] - p2[0], p1[1] - p2[1]    
 
 def get_nearest_pt(mouse_pos):
-  def diff(p1, p2):
-    dx = p1[0] - p2[0]
-    dy = p1[1] - p2[1]
-    return math.sqrt(dx * dx + dy * dy)
-  diffs = [(diff(mouse_pos, pt.get_value()), pt) for pt in all_points()]
+  diffs = [(length(mouse_pos, pt.get_value()), pt) for pt in all_points()]
   min_diff = min(diffs, key = lambda x: x[0])
   if min_diff[0] < 10: return min_diff[1]
   return None
@@ -95,7 +99,8 @@ def create_constraints():
     lambda pmid, p1: [(2 * pmid[0] - p1[0]) , (2 * pmid[1] - p1[1])])
 
   constraint = Constraint(
-    lambda p1, p2, pmid: is_midpoint(p1, p2, pmid),
+    lambda p1, p2, p3, p4, pmid: is_midpoint(p1, p2, pmid) and
+                         length(p1, pmid) == length(p3, p4),
     Strength.STRONG,
     [p1_var, p2_var, pmid_var],
     [mMp, mP1, mP2])
