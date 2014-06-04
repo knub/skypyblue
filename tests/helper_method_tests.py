@@ -4,10 +4,12 @@ try:
 except ImportError as e:
   from mock import Mock
 
-from skypyblue.constraint_system import ConstraintSystem, max_out
+from skypyblue.constraint_system import ConstraintSystem
 from skypyblue.models import *
+from skypyblue.marker import Marker
 
-new_mark = ConstraintSystem().new_mark
+new_mark = Marker().new_mark
+
 
 class HelperTests(TestCase):
 
@@ -17,7 +19,7 @@ class HelperTests(TestCase):
     v2 = cs.create_variable("v2", 12)
     method = Method(v1, v2, lambda v1: v1 - 1)
 
-    self.assertEqual(Strength.WEAKEST, max_out(method, [v1]))
+    self.assertEqual(Strength.WEAKEST, cs.max_out(method, [v1]))
 
   def test_new_mark_are_numbers(self):
     used_marks = set()
