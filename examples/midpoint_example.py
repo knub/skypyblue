@@ -11,11 +11,20 @@ p2_var = cs.create_variable("p2", [200, 400])
 p3_var = cs.create_variable("p1", [100, 150])
 p4_var = cs.create_variable("p2", [100, 250])
 
-def all_points(): 
+
+def all_points():
+  return [p1_var, pmid_var, p2_var, p3_var, p4_var]
+
+def main_line(): 
   return [p1_var, pmid_var, p2_var]
+
+def direction_line():
+  return [p3_var, p4_var]
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+
+
 
 LAST_MOUSE_POS = None
 CURRENT_POINT = None
@@ -80,13 +89,15 @@ def get_nearest_pt(mouse_pos):
   if min_diff[0] < 10: return min_diff[1]
   return None
 
-
-def draw_lines(surface):
-  pts = [p.get_value() for p in all_points()]
+def draw_line(pts, surface):
   pygame.draw.aalines(surface, WHITE, False, pts)
   for pt in pts:
     pygame.draw.circle(surface, WHITE, pt, 5)
   pygame.display.update()
+
+def draw_lines(surface):
+  draw_line([p.get_value() for p in main_line()], surface)
+  draw_line([p.get_value() for p in direction_line()], surface)
 
 def create_constraints():
   mMp = Method([p1_var, p2_var], [pmid_var],
