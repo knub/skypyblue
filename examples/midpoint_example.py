@@ -100,21 +100,49 @@ def draw_lines(surface):
   draw_line([p.get_value() for p in direction_line()], surface)
 
 def create_constraints():
-  mMp = Method([p1_var, p2_var], [pmid_var],
-    lambda p1, p2: [int((p1[0] + p2[0]) / 2), int((p1[1] + p2[1]) / 2)])
-
-  mP1 = Method([pmid_var, p2_var], [p1_var],
-    lambda pmid, p2: [(2 * pmid[0] - p2[0]) , (2 * pmid[1] - p2[1])])
-
-  mP2 = Method([pmid_var, p1_var], [p2_var],
-    lambda pmid, p1: [(2 * pmid[0] - p1[0]) , (2 * pmid[1] - p1[1])])
+  mpmp3p4 = Method([pmid_var, p3_var, p4_var], [p1_var, p2_var],
+    lambda pm, p3, p4: (
+      [
+        pm[0] - (p4[0] - p3[0]),
+        pm[1] - (p4[1] - p3[1])
+      ],
+      [
+        pm[0] + (p4[0] - p3[0]),
+        pm[1] + (p4[1] - p3[1])
+      ]
+      )
+  )
+  mp1p3p4 = Method([p1_var, p3_var, p4_var], [pm_var, p2_var],
+    lambda p1, p3, p4: (
+      [
+        p1[0] + (p4[0] - p3[0]),
+        p1[1] + (p4[1] - p3[1])
+      ],
+      [
+        p1[0] + 2 * (p4[0] - p3[0]),
+        p1[1] + 2 * (p4[1] - p3[1])
+      ]
+      )
+  )
+  mp2p3p4 = Method([p2_var, p3_var, p4_var], [pm_var, p1_var],
+    lambda p2, p3, p4: (
+      [
+        p2[0] - (p4[0] - p3[0]),
+        p2[1] - (p4[1] - p3[1])
+      ],
+      [
+        p2[0] - 2 * (p4[0] - p3[0]),
+        p2[1] - 2 * (p4[1] - p3[1])
+      ]
+      )
+  )
 
   constraint = Constraint(
     lambda p1, p2, p3, p4, pmid: is_midpoint(p1, p2, pmid) and
                          length(p1, pmid) == length(p3, p4),
     Strength.STRONG,
-    [p1_var, p2_var, pmid_var],
-    [mMp, mP1, mP2])
+    [pmid_var, p1_var, p2_var, p3_var, p4_var],
+    [mpmp3p4, mp1p3p4, mp2p3p4])
   cs.add_constraint(constraint)
 
 if __name__ == '__main__':
