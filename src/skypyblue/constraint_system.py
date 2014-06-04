@@ -149,17 +149,15 @@ class ConstraintSystem:
   def exec_from_roots(self, exec_roots):
     prop_mark = self.marker.new_mark()
     exec_pplan = []
-    # print([[isinstance(cn, Constraint), cn] for cn in exec_roots])
 
     for cn in exec_roots:
       if isinstance(cn, Constraint):
         res = self.pplan_add(exec_pplan, cn, prop_mark)
         exec_pplan.extend(res)
-    # print("="*10)
     for var in exec_roots:
       if isinstance(var, Variable):
         if var.determined_by == None and not var.valid:
-          exec_pplan.extend(var, prop_mark)
+          exec_pplan.extend(self.pplan_add([], var, prop_mark)) 
           var.valid = True
 
     while exec_pplan:
