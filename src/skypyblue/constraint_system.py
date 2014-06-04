@@ -1,5 +1,4 @@
 from skypyblue.models import Variable, Method, Constraint, Strength, InternalStrength
-import pdb;
 
 class ConstraintSystem:
 
