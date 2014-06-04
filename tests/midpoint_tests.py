@@ -10,13 +10,13 @@ class Point(object):
   def distance(self, other):
     dx = self.X - other.X
     dy = self.Y - other.Y
-    return math.sqrt(dx**2 + dy**2)
+    return math.sqrt(dx ** 2 + dy ** 2)
 
   def isMidpoint(self, point1, point2):
-    return self.X == (point1.X+point2.X)/2 and self.Y == (point1.Y+point2.Y)/2
+    return self.X == (point1.X + point2.X) / 2 and self.Y == (point1.Y + point2.Y) / 2
 
   def print_position(self):
-    print(self.X,'@',self.Y)
+    print(self.X, '@', self.Y)
 
   def __repr__(self):
     return "(%s, %s)" % (self.X, self.Y)
@@ -25,18 +25,18 @@ class MidpointTestClass(unittest.TestCase):
   __name__ = "MidpointTestClass"
   def setUp(self):
     self.constraint_system =ConstraintSystem()
-    self.point1 = self.constraint_system.create_variable("Point 1", Point(4,10))
-    self.point2 = self.constraint_system.create_variable("Point 2", Point(10,30))
-    self.midpoint = self.constraint_system.create_variable("midpoint", Point(0,0))
+    self.point1 = self.constraint_system.create_variable("Point 1", Point(4, 10))
+    self.point2 = self.constraint_system.create_variable("Point 2", Point(10, 30))
+    self.midpoint = self.constraint_system.create_variable("midpoint", Point(0, 0))
 
     mMp = Method([self.point1, self.point2], [self.midpoint],
-      lambda p1, p2: Point((p1.X + p2.X)/2 , (p1.Y + p2.Y)/2))
+      lambda p1, p2: Point((p1.X + p2.X) / 2 , (p1.Y + p2.Y) / 2))
 
     mP1 = Method([self.midpoint, self.point2], [self.point1],
-      lambda mp, p2: Point((2*mp.X - p2.X) , (2*mp.Y - p2.Y)))
+      lambda mp, p2: Point((2 * mp.X - p2.X) , (2 * mp.Y - p2.Y)))
 
     mP2 = Method([self.midpoint, self.point1], [self.point2],
-      lambda mp, p1: Point((2*mp.X - p1.X) , (2*mp.Y - p1.Y)))
+      lambda mp, p1: Point((2 * mp.X - p1.X) , (2 * mp.Y - p1.Y)))
 
 
     constraint = Constraint(
@@ -69,9 +69,9 @@ class MidpointTestClass(unittest.TestCase):
     self.assertEqual(midpoint.Y, 0)
 
   def test_change_several_points(self):
-    self.midpoint.set_value(Point(0,0))
-    self.point1.set_value(Point(10,10))
-    self.point2.set_value(Point(50,50))
+    self.midpoint.set_value(Point(0, 0))
+    self.point1.set_value(Point(10, 10))
+    self.point2.set_value(Point(50, 50))
     point2 = self.point2.get_value()
     self.test_contraint()
     self.assertEqual(point2.X, 50)
@@ -80,7 +80,7 @@ class MidpointTestClass(unittest.TestCase):
   def test_change_two_points_at_the_same_time(self):
     self.constraint_system.change_variable_values(
         [self.point1, self.point2],
-        [Point(0,0), Point(20,20)]
+        [Point(0, 0), Point(20, 20)]
       )
     point1 = self.point1.get_value()
     point2 = self.point2.get_value()
