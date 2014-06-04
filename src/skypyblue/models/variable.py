@@ -1,4 +1,4 @@
-from skypyblue.models.strengths import *
+from skypyblue.models import Strength, Constraint
 
 class Variable:
   def __init__(self, name, value, system = None, walk_strength = Strength.WEAKEST):
@@ -24,6 +24,25 @@ class Variable:
 
   def add_constraint(self, constraint):
     self.constraints.append(constraint)
+
+  def stay(self, strength):
+    if self.stay_constraint is not None:
+      self.cd.remove_constraint(self.stay_constraint)
+
+    m = Method([], [variable], lambda: variable.value)
+    self.stay_constraint = Constraint(
+      lambda x: True,
+      strength,
+      [variable], 
+      [m])
+
+    self.cs.add_constraint(self.stay_constraint)
+
+  def removeStayConstraint(self):
+    if self.stay_constraint is not None:
+      self.cd.remove_constraint(self.stay_constraint)
+      self.stay_constraint = None
+
 
   def __repr__(self):
     return "<Variable '%s', value: %s>" % (self.name, self.value)
