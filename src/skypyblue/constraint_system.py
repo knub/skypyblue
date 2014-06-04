@@ -15,7 +15,7 @@ class ConstraintSystem:
     return variable
 
   def change_variable_values(self, variables, values):
-    if len(variables)==1:
+    if len(variables) == 1:
       values = values[0]
       
     m = Method([], variables,
@@ -99,7 +99,8 @@ class ConstraintSystem:
     return self.mvine_enforce_cn(cn, cn.strength, done_mark, mvine_stack, redetermined_vars)
 
   def mvine_grow(self, root_strength, done_mark, mvine_stack, redetermined_vars):
-    if not mvine_stack: return True
+    if not mvine_stack:
+      return True
     cn = mvine_stack.pop()
     if cn.mark == done_mark:
       ok = self.mvine_grow(root_strength, done_mark, mvine_stack, redetermined_vars)
@@ -107,7 +108,8 @@ class ConstraintSystem:
       ok = self.mvine_revoke_cn(cn, root_strength, done_mark, mvine_stack, redetermined_vars)
     else:
       ok = self.mvine_enforce_cn(cn, root_strength, done_mark, mvine_stack, redetermined_vars)
-    if not ok: mvine_stack.append(cn)
+    if not ok:
+      mvine_stack.append(cn)
     return ok
 
   def mvine_revoke_cn(self, cn, root_strength, done_mark, mvine_stack, redetermined_vars):
