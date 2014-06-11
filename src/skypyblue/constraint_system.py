@@ -20,14 +20,14 @@ class ConstraintSystem:
   def change_variable_values(self, variables, values):
     if len(variables) == 1:
       values = values[0]
-      
+
     m = Method([], variables,
       lambda: values)
 
     cn = Constraint(
       lambda x: True,
       InternalStrength.FORCED,
-      variables, 
+      variables,
       [m])
 
     if self.forced_constraint is not None:
@@ -45,7 +45,7 @@ class ConstraintSystem:
     stay_constraint = Constraint(
       lambda x: True,
       strength,
-      [variable], 
+      [variable],
       [m])
 
     self.add_constraint(stay_constraint)
@@ -64,11 +64,11 @@ class ConstraintSystem:
   def remove_constraint(self, constraint):
     for variable in constraint.variables:
       variable.remove_constraint(constraint)
-    
+
     if constraint.is_enforced():
       old_outputs = constraint.selected_method.outputs
       constraint.selected_method = None
-      
+
       exec_roots = []
       for variable in old_outputs:
         variable.determined_by = None
@@ -80,9 +80,9 @@ class ConstraintSystem:
       self.collect_unenforced(unenforcedConstraints, old_outputs,constraint.strength,True)
       exec_roots = self.update_method_graph(unenforcedConstraints)
       self.exec_from_roots(exec_roots)
-      
 
-  def update_method_graph(self, unenforced_constraints): 
+
+  def update_method_graph(self, unenforced_constraints):
     exec_roots = []
     while unenforced_constraints:
       cn = self.strongest_constraint(unenforced_constraints)
@@ -105,7 +105,7 @@ class ConstraintSystem:
     return constraints[0]
 
   def weakest_constraint(self, constraints):
-    constraints.sort(key=lambda cn: cn.strength)  
+    constraints.sort(key=lambda cn: cn.strength)
     return constraints[0]
 
   def propagate_walk_strength(self, roots):
@@ -169,7 +169,7 @@ class ConstraintSystem:
     for var in exec_roots:
       if isinstance(var, Variable):
         if var.determined_by == None and not var.valid:
-          exec_pplan.extend(self.pplan_add([], var, prop_mark)) 
+          exec_pplan.extend(self.pplan_add([], var, prop_mark))
           var.valid = True
 
     while exec_pplan:
@@ -203,17 +203,26 @@ class ConstraintSystem:
           if consuming_cn != cn and consuming_cn.is_enforced:
             self.exec_from_cycle(consuming_cn, prop_mark)
 
+
+  def pplan_add_var(self, pplan, var, done_mark):
+    for cn in var.constraints:
+      if cn != var.determined_by:
+        self.pplan_add_cn(pplan, cn, done_mark)
+    return pplan
+
+  def pplan_add_cn(self, pplan, cn, done_mark):
+    if cn.is_enforced() and cn.mark != done_mark:
+      cn.mark = done_mark
+      for var in cn.selected_method.outputs:
+        pplan.extend(self.pplan_add_var(pplan, var, done_mark))
+      pplan.append(cn)
+    return pplan
+
   def pplan_add(self, pplan, obj, done_mark):
     if isinstance(obj, Constraint):
-      if obj.is_enforced() and obj.mark != done_mark:
-        obj.mark = done_mark
-        for var in obj.selected_method.outputs:
-          pplan.extend(self.pplan_add(pplan, var, done_mark))
-        pplan.append(obj)
+      self.pplan_add_cn(pplan, obj, done_mark)
     elif isinstance(obj, Variable):
-      for cn in obj.constraints:
-        if cn != obj.determined_by:
-          self.pplan_add(pplan, cn, done_mark)
+      self.pplan_add_var(pplan, obj, done_mark)
     elif isinstance(obj, list):
       for elt in obj:
         self.pplan_add(pplan, elt, done_mark)
@@ -256,7 +265,7 @@ class ConstraintSystem:
   #     plan.valid = False
   #     for cns in [plan.good_cns, plan.bad_cns, plan.root_cns]:
   #       for cn in cns:
-  #         if cn != invalid_cn: 
+  #         if cn != invalid_cn:
   #           cn.valid_plans.remove(plan)
   #   invalid_cn.valid_plans.clear()
 

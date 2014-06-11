@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Usage: 
+Usage:
   ./testrunner.py                     -> executes all tests
   ./testrunner.py <TestCaseClass>     -> executes only tests from this testcase
 """
@@ -15,6 +15,7 @@ from constraint_system_tests import *
 from variable_tests import *
 from helper_method_tests import *
 from mvine_tests import *
+from exec_tests import *
 from midpoint_tests import *
 from update_method_graph_tests import *
 
