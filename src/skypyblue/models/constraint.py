@@ -26,8 +26,9 @@ class Constraint:
     if self.is_enforced() and self.mark != done_mark:
       self.mark = done_mark
       for var in self.selected_method.outputs:
-        pplan.extend(var.add_to_pplan(pplan, done_mark))
-      pplan.append(self)
+        var.add_to_pplan(pplan, done_mark)
+      if self not in pplan:
+        pplan.append(self)
     return pplan
 
   def is_enforced(self):

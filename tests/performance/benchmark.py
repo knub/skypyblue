@@ -34,7 +34,7 @@ else:
 print()
 cprint("Deltablue results", attrs = ['bold'])
 cprint("================================", attrs = ['bold'])
-# benchmark(lambda: delta_blue(innerIter))
+benchmark(lambda: delta_blue(innerIter))
 
 cprint("Skypyblue results", attrs = ['bold'])
 cprint("================================", attrs = ['bold'])
