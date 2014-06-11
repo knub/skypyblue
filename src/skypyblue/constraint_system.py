@@ -10,6 +10,7 @@ class ConstraintSystem:
     self.constraints = []
     self.variables = []
     self.forced_constraint = None
+    self.mark = None
 
   def create_variables(self, names, initialValues):
     assert len(names) == len(initialValues)
@@ -41,7 +42,6 @@ class ConstraintSystem:
 
     self.forced_constraint = cn
     self.add_constraint(cn)
-
 
   def variable_changed(self, var):
     self.change_variable_values([var], [var.value])
@@ -215,11 +215,19 @@ class ConstraintSystem:
             self.exec_from_cycle(consuming_cn, prop_mark)
 
 
+
   def pplan_add(self, pplan, objs, done_mark):
     if not isinstance(objs, list): raise Exception("accepting only list of objs!")
     for elt in objs:
       elt.add_to_pplan(pplan, done_mark)
     return pplan
+
+  def _new_mark(self):
+    self.marker.new_mark()
+
+  @property
+  def mark(self):
+    return self.marker.mark
 
   # def extract_plan(self, root_cns):
   #   good_cns = []
