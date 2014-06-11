@@ -1,32 +1,35 @@
 from skypyblue.models import Strength
 
 class Mvine:
-  def __init__(self,marker):
+  def __init__(self, marker):
     self.marker = marker
 
-  def build(self, cn, redetermined_vars):
-    mvine_stack = []
-    done_mark = self.marker.new_mark()
-    return self.enforce_cn(cn, cn.strength, done_mark, mvine_stack, redetermined_vars)
+  @property
+  def mark(self):
+    return self.marker.mark
 
-  def grow(self, root_strength, done_mark, mvine_stack, redetermined_vars):
+  def build(self, cn, redetermined_vars):
+    self.marker.new_mark()
+    return self.enforce_cn(cn, cn.strength, [], redetermined_vars)
+
+  def grow(self, root_strength, mvine_stack, redetermined_vars):
     if not mvine_stack: return True
     cn = mvine_stack.pop()
-    if cn.mark == done_mark:
-      ok = self.grow(root_strength, done_mark, mvine_stack, redetermined_vars)
+    if cn.mark == self.mark:
+      ok = self.grow(root_strength, mvine_stack, redetermined_vars)
     elif Strength.weaker(cn.strength, root_strength):
-      ok = self.revoke_cn(cn, root_strength, done_mark, mvine_stack, redetermined_vars)
+      ok = self.revoke_cn(cn, root_strength, mvine_stack, redetermined_vars)
     else:
-      ok = self.enforce_cn(cn, root_strength, done_mark, mvine_stack, redetermined_vars)
+      ok = self.enforce_cn(cn, root_strength, mvine_stack, redetermined_vars)
     if not ok: mvine_stack.append(cn)
     return ok
 
-  def revoke_cn(self, cn, root_strength, done_mark, mvine_stack, redetermined_vars):
-    cn.mark = done_mark
-    ok = self.grow(root_strength, done_mark, mvine_stack, redetermined_vars)
+  def revoke_cn(self, cn, root_strength, mvine_stack, redetermined_vars):
+    cn.mark = self.mark
+    ok = self.grow(root_strength, mvine_stack, redetermined_vars)
     if ok:
       for var in cn.selected_method.outputs:
-        if var.mark != done_mark:
+        if var.mark != self.mark:
           var.determined_by = None
           var.walk_strength = Strength.WEAKEST
           redetermined_vars.append(var)
@@ -36,20 +39,20 @@ class Mvine:
       cn.mark = None
       return False
 
-  def enforce_cn(self, cn, root_strength, done_mark, mvine_stack, redetermined_vars):
-    cn.mark = done_mark
+  def enforce_cn(self, cn, root_strength, mvine_stack, redetermined_vars):
+    cn.mark = self.mark
     for mt in cn.methods:
-      if self.possible_method(mt, cn, root_strength, done_mark):
+      if self.possible_method(mt, cn, root_strength):
         next_cns = self.all_constraints_that_determine_a_var_in(mt.outputs)
-        for new_cn in next_cns: 
+        for new_cn in next_cns:
           mvine_stack.append(new_cn)
         for var in mt.outputs:
-          var.mark = done_mark
-        ok = self.grow(root_strength, done_mark, mvine_stack, redetermined_vars)
+          var.mark = self.mark
+        ok = self.grow(root_strength, mvine_stack, redetermined_vars)
         if ok:
           if not cn.selected_method is None:
             for var in cn.selected_method.outputs:
-              if var.mark != done_mark:
+              if var.mark != self.mark:
                 var.determined_by = None
                 var.walk_strength = Strength.WEAKEST
                 redetermined_vars.append(var)
@@ -71,12 +74,12 @@ class Mvine:
         constraints.add(variable.determined_by)
     return constraints
 
-  def possible_method(self, mt, cn, root_strength, done_mark):
+  def possible_method(self, mt, cn, root_strength):
     for var in mt.outputs:
-      if var.mark == done_mark: return False
+      if var.mark == self.mark: return False
       if not Strength.weaker(var.walk_strength, root_strength):
-        if cn.selected_method == None: 
+        if cn.selected_method == None:
           return False
-        if not var in cn.selected_method.outputs: 
+        if not var in cn.selected_method.outputs:
           return False
     return True
