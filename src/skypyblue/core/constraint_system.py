@@ -1,6 +1,5 @@
 from skypyblue.models import Variable, Method, Constraint, Strength, InternalStrength
-from skypyblue.mvine import Mvine
-from skypyblue.marker import Marker
+from skypyblue.core import Mvine, Marker
 import pdb;
 
 class ConstraintSystem:
