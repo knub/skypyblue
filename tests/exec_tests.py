@@ -44,13 +44,10 @@ class PplanTests(TestCase):
       [],
       "does not add unenforced constraints")
 
-
   def test_pplan_add_for_variable(self):
     v = self.cs.create_variable("v", 1)
     self.assertEqual(
       v.add_to_pplan([], self.cs.marker.new_mark()),
       [],
       "plain variable return pplan as it was")
-
-
 

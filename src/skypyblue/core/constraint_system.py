@@ -10,6 +10,12 @@ class ConstraintSystem:
     self.variables = []
     self.forced_constraint = None
 
+  def create_variables(self, names, initialValues):
+    assert len(names) == len(initialValues)
+    res = []
+    for i in range(len(names)):
+      res.append(self.create_variable(names[i], initialValues[i]))
+    return res
 
   def create_variable(self, name, initialValue):
     variable = Variable(name, initialValue, self)

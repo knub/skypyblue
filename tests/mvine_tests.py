@@ -109,9 +109,9 @@ class MVineTests(TestCase):
     self.assertTrue(cn.mark is None)
 
   def test_mvine_enforce_cn_fails(self):
-    v1 = Variable("v1", 1)
-    v2 = Variable("v2", 2)
-    v3 = Variable("v3", 3)
+    v1 = Variable("v1", 1, system = None)
+    v2 = Variable("v2", 2, system = None)
+    v3 = Variable("v3", 3, system = None)
     m = Method([v1, v2], v3, None)
     cn = Constraint(None, Strength.WEAKEST, [], m)
     cn.mark = new_mark()
