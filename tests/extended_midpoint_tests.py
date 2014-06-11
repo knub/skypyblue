@@ -1,6 +1,6 @@
 import unittest
 import math
-from skypyblue.constraint_system import ConstraintSystem
+from skypyblue.core import ConstraintSystem
 from skypyblue.models import Constraint, Strength, Method
 
 class Point(object):

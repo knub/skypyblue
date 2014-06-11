@@ -1,4 +1,4 @@
-from skypyblue.constraint_system import ConstraintSystem
+from skypyblue.core import ConstraintSystem
 from skypyblue.models import Constraint, Method, Strength
 from unittest import TestCase
 
@@ -44,10 +44,13 @@ class PplanTests(TestCase):
       [],
       "does not add unenforced constraints")
 
+
   def test_pplan_add_for_variable(self):
     v = self.cs.create_variable("v", 1)
     self.assertEqual(
       v.add_to_pplan([], self.cs.marker.new_mark()),
       [],
       "plain variable return pplan as it was")
+
+
 

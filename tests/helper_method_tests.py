@@ -4,9 +4,8 @@ try:
 except ImportError as e:
   from mock import Mock
 
-from skypyblue.constraint_system import ConstraintSystem
+from skypyblue.core import ConstraintSystem, Marker
 from skypyblue.models import *
-from skypyblue.marker import Marker
 
 new_mark = Marker().new_mark
 
