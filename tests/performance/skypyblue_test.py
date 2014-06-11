@@ -3,6 +3,7 @@ sys.path.append("../../src")
 
 from skypyblue.constraint_system import ConstraintSystem
 from skypyblue import *
+from skypyblue.models import *
 
 """
 See deltablue_test#chain_test for documentation
@@ -10,7 +11,7 @@ on this benchmark.
 """
 def chain_test(n):
   cs = ConstraintSystem()
-  cf = models.ConstraintFactory()
+  cf = ConstraintFactory()
   prev, first, last = None, None, None
 
   # We need to go up to n inclusively.
@@ -19,7 +20,7 @@ def chain_test(n):
     v = Variable(name, 0, cs)
 
     if prev is not None:
-      c = cf.equality_constraint(prev, v, Strength.REQUIRED)
+      c = cf.equality_constraint(prev, v, Strength.STRONG)
       cs.add_constraint(c)
     if i == 0:
       first = v
@@ -29,12 +30,12 @@ def chain_test(n):
 
     prev = v
 
-  cs.stay(last, Strength.MEDIUM)
+  cs.add_stay_constraint(last, Strength.MEDIUM)
 
   for i in range(100):
     first.set_value(i)
 
-    if last.get_value != i:
+    if last.get_value() != i:
       print("Chain test failed.")
 
 """
