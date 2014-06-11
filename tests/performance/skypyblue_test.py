@@ -1,7 +1,7 @@
 import unittest, sys
 sys.path.append("../../src")
 
-from skypyblue.constraint_system import ConstraintSystem
+from skypyblue.core import *
 from skypyblue import *
 from skypyblue.models import *
 

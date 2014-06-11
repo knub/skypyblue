@@ -117,7 +117,7 @@ class ConstraintSystem:
 
   def propagate_walk_strength(self, roots):
     self._new_mark()
-    walk_pplan = self.pplan_add([], roots)
+    walk_pplan = self.pplan_add(roots)
 
     while walk_pplan:
       cn = walk_pplan.pop()
@@ -217,11 +217,12 @@ class ConstraintSystem:
 
 
 
-  def pplan_add(self, pplan, objs):
+  def pplan_add(self, objs):
+    pplan = []
     if not isinstance(objs, list):
       raise Exception("accepting only list of objs!")
-    for elt in objs:
-      elt.add_to_pplan(pplan, self.mark)
+    for el in objs:
+      el.add_to_pplan(pplan, self.mark)
     return pplan
 
   def _new_mark(self):
