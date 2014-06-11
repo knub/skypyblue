@@ -11,7 +11,7 @@ class VariableTest(unittest.TestCase):
     This only tests basic getters and setters, no constraint solving technology.
   """
   def setUp(self):
-    self.variable = Variable("variable", 10)
+    self.variable = Variable("variable", 10, system = None)
     self.variable.system = Mock()
     self.variable.system.remove_constraint = Mock()
     self.variable.system.add_stay_constraint = Mock()

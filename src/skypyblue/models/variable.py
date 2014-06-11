@@ -1,7 +1,7 @@
 from skypyblue.models import Strength
 
 class Variable:
-  def __init__(self, name, value, system = None, walk_strength = Strength.WEAKEST):
+  def __init__(self, name, value, system, walk_strength = Strength.WEAKEST):
     self.name = name
     self.value = value
     self.constraints = []
