@@ -612,10 +612,5 @@ planner = None
 import time
 
 def delta_blue(iterations):
-  startTime = time.time()
-
   chain_test(iterations)
   projection_test(iterations)
-  
-  endTime = time.time()
-  return startTime, endTime
