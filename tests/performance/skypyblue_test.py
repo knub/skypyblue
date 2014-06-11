@@ -1,7 +1,8 @@
 import unittest, sys
 sys.path.append("../../src")
 
-from skypyblue.constraint_system import *
+from skypyblue.constraint_system import ConstraintSystem
+from skypyblue import *
 
 """
 See deltablue_test#chain_test for documentation
@@ -36,6 +37,14 @@ def chain_test(n):
     if last.get_value != i:
       print("Chain test failed.")
 
+"""
+See deltablue_test#projection_test for documentation
+on this benchmark.
+"""
+def projection_test(n):
+  pass
+
 def skypyblue(innerIter):
   chain_test(innerIter)
+  projection_test(innerIter)
 
