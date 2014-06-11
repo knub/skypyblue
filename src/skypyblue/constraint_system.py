@@ -37,7 +37,7 @@ class ConstraintSystem:
       [m])
 
     if self.forced_constraint is not None:
-      self.remove_constraint(self.forced_constraint)
+      self.remove_constraint(self.forced_constraint, skip = True)
 
     self.forced_constraint = cn
     self.add_constraint(cn)
@@ -67,7 +67,7 @@ class ConstraintSystem:
     exec_roots = self.update_method_graph([constraint])
     self.exec_from_roots(exec_roots)
 
-  def remove_constraint(self, constraint):
+  def remove_constraint(self, constraint, skip = False):
     for variable in constraint.variables:
       variable.remove_constraint(constraint)
 
@@ -80,6 +80,9 @@ class ConstraintSystem:
         variable.determined_by = None
         variable.walk_strength = Strength.WEAKEST
         exec_roots.append(variable)
+
+      if skip:
+        return
 
       self.propagate_walk_strength(old_outputs)
       unenforcedConstraints = []
@@ -116,7 +119,7 @@ class ConstraintSystem:
 
   def propagate_walk_strength(self, roots):
     prop_mark = self.marker.new_mark()
-    walk_pplan = self.pplan_add([], roots, prop_mark)
+    walk_pplan = list(set(self.pplan_add([], roots, prop_mark)))
 
     while walk_pplan:
       cn = walk_pplan.pop()
@@ -216,7 +219,8 @@ class ConstraintSystem:
 
 
   def pplan_add(self, pplan, objs, done_mark):
-    if not isinstance(objs, list): raise Exception("accepting only list of objs!")
+    if not isinstance(objs, list):
+      raise Exception("accepting only list of objs!")
     for elt in objs:
       elt.add_to_pplan(pplan, done_mark)
     return pplan
