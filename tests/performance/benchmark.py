@@ -4,7 +4,19 @@ from termcolor import colored, cprint
 
 from deltablue_test import *
 from skypyblue_test import *
- 
+
+
+def benchmark(constraint_solver):
+  for i in range(warmUp):
+    constraint_solver()
+
+  for i in range(numIterations):
+    startTime = time.time()
+    constraint_solver()
+    endTime = time.time()
+    milliseconds = int((endTime - startTime) * 1000)
+    print("iterations=%d runtime: %dms" % (i, milliseconds))
+
 if len(sys.argv) < 4:
   print("Not all parameters specified. Using default parameters 5 5 2000")
   numIterations = 5
@@ -19,17 +31,10 @@ else:
   innerIter     = int(sys.argv[3])
 
 print()
-cprint("Delta-Blue results", attrs = ['bold'])
+cprint("Deltablue results", attrs = ['bold'])
 cprint("================================", attrs = ['bold'])
-for i in range(warmUp):
-  startTime, endTime = delta_blue(innerIter)
-
-for i in range(numIterations):
-  startTime, endTime = delta_blue(innerIter)
-  milliseconds = int((endTime - startTime) * 1000)
-  print("DeltaBlue: iterations=%d runtime: %dms" % (i, milliseconds))
-
-
+benchmark(lambda: delta_blue(innerIter))
 
 cprint("Skypyblue results", attrs = ['bold'])
 cprint("================================", attrs = ['bold'])
+benchmark(lambda: skypyblue(innerIter))
