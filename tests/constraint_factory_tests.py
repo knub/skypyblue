@@ -1,5 +1,5 @@
 import unittest
-from skypyblue.constraint_system import ConstraintSystem
+from skypyblue.core import ConstraintSystem
 from skypyblue.models import ConstraintFactory
 
 class ConstraintFactoryTestClass:

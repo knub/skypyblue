@@ -1,5 +1,5 @@
 from unittest import TestCase
-from skypyblue.constraint_system import ConstraintSystem
+from skypyblue.core import ConstraintSystem
 from skypyblue.models import Method, Constraint, Strength
 try:
   from unittest.mock import MagicMock as Mock

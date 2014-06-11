@@ -19,6 +19,8 @@ from exec_tests import *
 from midpoint_tests import *
 from extended_midpoint_tests import *
 from update_method_graph_tests import *
+from constraint_tests import *
+from constraint_factory_tests import *
 
 unittest.main()
 
