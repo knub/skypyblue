@@ -18,10 +18,11 @@ def benchmark(constraint_solver):
     print("iterations=%d runtime: %dms" % (i, milliseconds))
 
 if len(sys.argv) < 4:
-  print("Not all parameters specified. Using default parameters 5 5 2000")
   numIterations = 5
   warmUp        = 5
-  innerIter     = 2000
+  innerIter     = 100
+  print("Not all parameters specified. Using default parameters %d %d %d" %
+    (numIterations, warmUp, innerIter))
 else:
   # outer iterations
   numIterations = int(sys.argv[1])

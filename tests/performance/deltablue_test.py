@@ -547,7 +547,7 @@ def chain_test(n):
 
 def projection_test(n):
   """
-  This test constructs a two sets of variables related to each
+  This test constructs two sets of variables related to each
   other by a simple linear transformation (scale and offset). The
   time is measured to change a variable on either side of the
   mapping and to change the scale and offset factors.
