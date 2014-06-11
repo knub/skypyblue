@@ -92,7 +92,7 @@ class ConstraintSystem:
       ok = Mvine(self.marker).build(cn, redetermined_vars)
       if not ok:
         return exec_roots
-      self.propagate_walk_strength([cn] + [redetermined_vars])
+      self.propagate_walk_strength([cn] + redetermined_vars)
       self.collect_unenforced(unenforced_constraints, redetermined_vars, cn.strength, False)
       exec_roots.append(cn)
       for var in redetermined_vars:
@@ -110,8 +110,7 @@ class ConstraintSystem:
 
   def propagate_walk_strength(self, roots):
     prop_mark = self.marker.new_mark()
-    walk_pplan = []
-    self.pplan_add(walk_pplan, roots, prop_mark)
+    walk_pplan = self.pplan_add([], roots, prop_mark)
 
     while walk_pplan:
       cn = walk_pplan.pop()
@@ -164,12 +163,12 @@ class ConstraintSystem:
 
     for cn in exec_roots:
       if isinstance(cn, Constraint):
-        res = self.pplan_add(exec_pplan, cn, prop_mark)
+        res = cn.add_to_pplan(exec_pplan, prop_mark)
         exec_pplan.extend(res)
     for var in exec_roots:
       if isinstance(var, Variable):
         if var.determined_by == None and not var.valid:
-          exec_pplan.extend(self.pplan_add([], var, prop_mark))
+          exec_pplan.extend(var.add_to_pplan([], prop_mark))
           var.valid = True
 
     while exec_pplan:
@@ -204,29 +203,12 @@ class ConstraintSystem:
             self.exec_from_cycle(consuming_cn, prop_mark)
 
 
-  def pplan_add_var(self, pplan, var, done_mark):
-    for cn in var.constraints:
-      if cn != var.determined_by:
-        self.pplan_add_cn(pplan, cn, done_mark)
-    return pplan
-
-  def pplan_add_cn(self, pplan, cn, done_mark):
-    if cn.is_enforced() and cn.mark != done_mark:
-      cn.mark = done_mark
-      for var in cn.selected_method.outputs:
-        pplan.extend(self.pplan_add_var(pplan, var, done_mark))
-      pplan.append(cn)
-    return pplan
-
   def pplan_add(self, pplan, obj, done_mark):
-    if isinstance(obj, Constraint):
-      self.pplan_add_cn(pplan, obj, done_mark)
-    elif isinstance(obj, Variable):
-      self.pplan_add_var(pplan, obj, done_mark)
-    elif isinstance(obj, list):
+    if isinstance(obj, list):
       for elt in obj:
-        self.pplan_add(pplan, elt, done_mark)
-
+          elt.add_to_pplan(pplan, done_mark)
+    else:
+      obj.add_to_pplan(pplan, done_mark)
     return pplan
 
   # def extract_plan(self, root_cns):
