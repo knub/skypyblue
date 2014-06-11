@@ -157,26 +157,32 @@ class ConstraintSystem:
           unenforced_cns.append(cn)
     return unenforced_cns
 
-  def exec_from_roots(self, exec_roots):
-    prop_mark = self.marker.new_mark()
+
+  def exec_pplan_create(self, exec_roots, mark):
     exec_pplan = []
 
     for cn in exec_roots:
       if isinstance(cn, Constraint):
-        res = cn.add_to_pplan(exec_pplan, prop_mark)
-        exec_pplan.extend(res)
+        cn.add_to_pplan(exec_pplan, mark)
+
     for var in exec_roots:
       if isinstance(var, Variable):
         if var.determined_by == None and not var.valid:
-          exec_pplan.extend(var.add_to_pplan([], prop_mark))
+          exec_pplan.extend(var.add_to_pplan([], mark))
           var.valid = True
+
+    return exec_pplan
+
+  def exec_from_roots(self, exec_roots):
+    prop_mark = self.marker.new_mark()
+    exec_pplan = self.exec_pplan_create(exec_roots, prop_mark)
 
     while exec_pplan:
       cn = exec_pplan.pop()
       if cn.mark != prop_mark:
         # this cn has already been processed: do nothing
         # WTF?
-        pass
+        continue
       elif self.any_immediate_upstream_marked(cn, prop_mark):
         self.exec_from_cycle(cn, prop_mark)
       else:
@@ -203,12 +209,10 @@ class ConstraintSystem:
             self.exec_from_cycle(consuming_cn, prop_mark)
 
 
-  def pplan_add(self, pplan, obj, done_mark):
-    if isinstance(obj, list):
-      for elt in obj:
-          elt.add_to_pplan(pplan, done_mark)
-    else:
-      obj.add_to_pplan(pplan, done_mark)
+  def pplan_add(self, pplan, objs, done_mark):
+    if not isinstance(objs, list): raise Exception("accepting only list of objs!")
+    for elt in objs:
+      elt.add_to_pplan(pplan, done_mark)
     return pplan
 
   # def extract_plan(self, root_cns):
