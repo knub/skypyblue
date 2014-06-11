@@ -28,7 +28,7 @@ class Variable:
 
   def stay(self, strength=Strength.WEAK):
     if self.stay_constraint is not None:
-      self.cd.remove_constraint(self.stay_constraint)
+      self.system.remove_constraint(self.stay_constraint)
 
     self.stay_constraint = self.system.add_stay_constraint(self,strength)
 
