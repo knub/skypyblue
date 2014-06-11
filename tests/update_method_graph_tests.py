@@ -4,8 +4,7 @@ try:
 except ImportError as e:
   from mock import Mock
 
-from skypyblue.constraint_system import ConstraintSystem
-from skypyblue.mvine import Mvine
+from skypyblue.core import ConstraintSystem, Mvine
 from skypyblue.models import *
 from fixture import Fixture
 

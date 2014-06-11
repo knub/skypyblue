@@ -4,10 +4,8 @@ try:
 except ImportError as e:
   from mock import Mock
 
-from skypyblue.marker import Marker
 from skypyblue.models import *
-from skypyblue.mvine import Mvine
-from skypyblue.constraint_system import ConstraintSystem
+from skypyblue.core import Mvine, Marker, ConstraintSystem
 
 new_mark = Marker().new_mark
 
@@ -109,9 +107,9 @@ class MVineTests(TestCase):
     self.assertTrue(cn.mark is None)
 
   def test_mvine_enforce_cn_fails(self):
-    v1 = Variable("v1", 1, system = None)
-    v2 = Variable("v2", 2, system = None)
-    v3 = Variable("v3", 3, system = None)
+    v1 = Variable("v1", 1, Mock())
+    v2 = Variable("v2", 2, Mock())
+    v3 = Variable("v3", 3, Mock())
     m = Method([v1, v2], v3, None)
     cn = Constraint(None, Strength.WEAKEST, [], m)
     cn.mark = new_mark()

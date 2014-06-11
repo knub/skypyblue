@@ -1,4 +1,4 @@
-from skypyblue.constraint_system import ConstraintSystem
+from skypyblue.core import ConstraintSystem
 from skypyblue.models import Constraint, Method, Strength, Variable, Strength
 
 class Fixture:

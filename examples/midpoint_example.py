@@ -1,7 +1,7 @@
 import pygame, math, sys
 sys.path.append("../src")
 
-from skypyblue.constraint_system import ConstraintSystem
+from skypyblue.core import ConstraintSystem
 from skypyblue.models import Method, Constraint, Strength
 
 cs = ConstraintSystem()
