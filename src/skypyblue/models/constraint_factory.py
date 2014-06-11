@@ -10,9 +10,9 @@ class ConstraintFactory:
       lambda v2: v2)
 
       constraint = Constraint(
-        lambda v1, v2: v1==v2),
+        lambda v1, v2: v1==v2,
         strength, 
         [variable1, variable2], 
-        [m^,m1])
+        [m1,m2])
       
       return constraint
