@@ -18,6 +18,7 @@ from helper_method_tests import *
 from mvine_tests import *
 from exec_tests import *
 from midpoint_tests import *
+from extended_midpoint_tests import *
 from update_method_graph_tests import *
 
 unittest.main()
