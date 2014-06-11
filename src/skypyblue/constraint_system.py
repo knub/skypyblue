@@ -203,12 +203,10 @@ class ConstraintSystem:
             self.exec_from_cycle(consuming_cn, prop_mark)
 
 
-  def pplan_add(self, pplan, obj, done_mark):
-    if isinstance(obj, list):
-      for elt in obj:
-          elt.add_to_pplan(pplan, done_mark)
-    else:
-      obj.add_to_pplan(pplan, done_mark)
+  def pplan_add(self, pplan, objs, done_mark):
+    if not isinstance(objs, list): raise Exception("accepting only list of objs!")
+    for elt in objs:
+        elt.add_to_pplan(pplan, done_mark)
     return pplan
 
   # def extract_plan(self, root_cns):
