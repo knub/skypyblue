@@ -2,7 +2,7 @@ from skypyblue.constraint_system import ConstraintSystem
 from skypyblue.models import Constraint, Method, Strength
 from unittest import TestCase
 
-class ExecTests(TestCase):
+class PplanTests(TestCase):
 
   def setUp(self):
     self.cs = ConstraintSystem()
