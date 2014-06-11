@@ -10,7 +10,6 @@ class ConstraintSystem:
     self.constraints = []
     self.variables = []
     self.forced_constraint = None
-    self.mark = None
 
   def create_variables(self, names, initialValues):
     assert len(names) == len(initialValues)
@@ -115,22 +114,22 @@ class ConstraintSystem:
     return constraints[0]
 
   def propagate_walk_strength(self, roots):
-    prop_mark = self.marker.new_mark()
-    walk_pplan = self.pplan_add([], roots, prop_mark)
+    self._new_mark()
+    walk_pplan = self.pplan_add([], roots)
 
     while walk_pplan:
       cn = walk_pplan.pop()
-      if self.any_immediate_upstream_marked(cn, prop_mark):
+      if self.any_immediate_upstream_marked(cn):
         for var  in cn.selected_method.inputs:
           if var.determined_by != None:
-            if var.determined_by.mark == prop_mark:
+            if var.determined_by.mark == self.mark:
               var.walk_strength = Strength.WEAKEST
       self.compute_walkabout_strengths(cn)
       cn.mark = None
 
-  def any_immediate_upstream_marked(self, cn, mark):
+  def any_immediate_upstream_marked(self, cn):
     for var in cn.selected_method.inputs:
-        if var.determined_by != None and var.determined_by.mark == mark:
+        if var.determined_by != None and var.determined_by.mark == self.mark:
           return True
     return False
 
@@ -146,51 +145,51 @@ class ConstraintSystem:
       out_var.walk_strength = min_strength
 
   def collect_unenforced(self, unenforced_cns, vars, collection_strength, collect_equal_strength):
-    done_mark = self.marker.new_mark()
+    self._new_mark()
     for var in vars:
-      unenforced_cns.extend(self.collect_unenforced_mark(unenforced_cns, var, collection_strength, collect_equal_strength, done_mark))
+      unenforced_cns.extend(self.collect_unenforced_mark(unenforced_cns, var, collection_strength, collect_equal_strength))
     return unenforced_cns
 
-  def collect_unenforced_mark(self, unenforced_cns, var, collection_strength, collect_equal_strength, done_mark):
+  def collect_unenforced_mark(self, unenforced_cns, var, collection_strength, collect_equal_strength):
     for cn in var.constraints:
-      if cn != var.determined_by and cn.mark != done_mark:
-        cn.mark = done_mark
+      if cn != var.determined_by and cn.mark != self.mark:
+        cn.mark = self.mark
         if cn.is_enforced():
           for out_var in cn.selected_method.outputs:
-            self.collect_unenforced_mark(unenforced_cns, out_var, collection_strength, collect_equal_strength, done_mark)
+            self.collect_unenforced_mark(unenforced_cns, out_var, collection_strength, collect_equal_strength)
         elif Strength.weaker(cn.strength, collection_strength) or \
               (collect_equal_strength and (cn.strength == collection_strength)):
           unenforced_cns.append(cn)
     return unenforced_cns
 
 
-  def exec_pplan_create(self, exec_roots, mark):
+  def exec_pplan_create(self, exec_roots):
     exec_pplan = []
 
     for cn in exec_roots:
       if isinstance(cn, Constraint):
-        cn.add_to_pplan(exec_pplan, mark)
+        cn.add_to_pplan(exec_pplan, self.mark)
 
     for var in exec_roots:
       if isinstance(var, Variable):
         if var.determined_by == None and not var.valid:
-          exec_pplan.extend(var.add_to_pplan([], mark))
+          exec_pplan.extend(var.add_to_pplan([], self.mark))
           var.valid = True
 
     return exec_pplan
 
   def exec_from_roots(self, exec_roots):
-    prop_mark = self.marker.new_mark()
-    exec_pplan = self.exec_pplan_create(exec_roots, prop_mark)
+    self._new_mark()
+    exec_pplan = self.exec_pplan_create(exec_roots)
 
     while exec_pplan:
       cn = exec_pplan.pop()
-      if cn.mark != prop_mark:
+      if cn.mark != self.mark:
         # this cn has already been processed: do nothing
         # WTF?
         continue
-      elif self.any_immediate_upstream_marked(cn, prop_mark):
-        self.exec_from_cycle(cn, prop_mark)
+      elif self.any_immediate_upstream_marked(cn):
+        self.exec_from_cycle(cn)
       else:
         cn.mark = None
         self.execute_propagate_valid(cn)
@@ -205,21 +204,21 @@ class ConstraintSystem:
     for var in cn.selected_method.outputs:
       var.valid = inputs_valid
 
-  def exec_from_cycle(self, cn, prop_mark):
-    if cn.mark == prop_mark:
+  def exec_from_cycle(self, cn):
+    if cn.mark == self.mark:
       cn.mark = None
       for var in cn.selected_method.outputs:
         var.valid = False
         for consuming_cn in var.constraints:
           if consuming_cn != cn and consuming_cn.is_enforced:
-            self.exec_from_cycle(consuming_cn, prop_mark)
+            self.exec_from_cycle(consuming_cn)
 
 
 
-  def pplan_add(self, pplan, objs, done_mark):
+  def pplan_add(self, pplan, objs):
     if not isinstance(objs, list): raise Exception("accepting only list of objs!")
     for elt in objs:
-      elt.add_to_pplan(pplan, done_mark)
+      elt.add_to_pplan(pplan, self.mark)
     return pplan
 
   def _new_mark(self):
@@ -232,14 +231,14 @@ class ConstraintSystem:
   # def extract_plan(self, root_cns):
   #   good_cns = []
   #   bad_cns = []
-  #   prop_mark = self.marker.new_mark()
-  #   pplan = self.pplan_add([], root_cns, prop_mark)
+  #   self._new_mark()
+  #   pplan = self.pplan_add([], root_cns)
 
   #   while pplan:
   #     cn = pplan.pop()
-  #     if cn.mark != prop_mark:
+  #     if cn.mark != self.mark:
   #       pass
-  #     elif self.any_immediate_upstream_marked(cn, prop_mark):
+  #     elif self.any_immediate_upstream_marked(cn):
   #       bad_cns.append(cn)
   #     else:
   #       cn.mark = None
