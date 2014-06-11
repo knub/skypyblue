@@ -149,7 +149,10 @@ class ConstraintSystem:
   def collect_unenforced(self, unenforced_cns, vars, collection_strength, collect_equal_strength):
     self._new_mark()
     for var in vars:
-      unenforced_cns.extend(self.collect_unenforced_mark(unenforced_cns, var, collection_strength, collect_equal_strength))
+      collected = self.collect_unenforced_mark(unenforced_cns, var, collection_strength, collect_equal_strength)
+      for val in set(collected):
+        if val not in unenforced_cns:
+          unenforced_cns.append(val)
     return unenforced_cns
 
   def collect_unenforced_mark(self, unenforced_cns, var, collection_strength, collect_equal_strength):
