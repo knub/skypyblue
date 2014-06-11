@@ -19,8 +19,8 @@ def benchmark(constraint_solver):
 
 if len(sys.argv) < 4:
   numIterations = 5
-  warmUp        = 5
-  innerIter     = 100
+  warmUp        = 0
+  innerIter     = 10
   print("Not all parameters specified. Using default parameters %d %d %d" %
     (numIterations, warmUp, innerIter))
 else:
@@ -34,7 +34,7 @@ else:
 print()
 cprint("Deltablue results", attrs = ['bold'])
 cprint("================================", attrs = ['bold'])
-benchmark(lambda: delta_blue(innerIter))
+# benchmark(lambda: delta_blue(innerIter))
 
 cprint("Skypyblue results", attrs = ['bold'])
 cprint("================================", attrs = ['bold'])
