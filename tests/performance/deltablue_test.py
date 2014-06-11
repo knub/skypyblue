@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 deltablue.py
 ============
@@ -610,14 +609,9 @@ def change(v, new_value):
 # In spirit of the original, we'll keep it, but ugh.
 planner = None
 
-
-def delta_blue():
-  chain_test(100)
-  projection_test(100)
-
 import time
 
-def entry_point(iterations):
+def delta_blue(iterations):
   startTime = time.time()
 
   chain_test(iterations)
@@ -625,29 +619,3 @@ def entry_point(iterations):
   
   endTime = time.time()
   return startTime, endTime
-
-if __name__ == '__main__':
-  import sys
-   
-  if len(sys.argv) < 4:
-    print("Not all parameters specified.")
-    print("Using default parameters 10 10 10")
-    numIterations = 10
-    warmUp        = 10
-    innerIter     = 10
-  else:
-    # outer iterations
-    numIterations = int(sys.argv[1])
-    # outer warmup iterations
-    warmUp        = int(sys.argv[2])
-    # test size
-    innerIter     = int(sys.argv[3])
-
-  for i in range(warmUp):
-    startTime, endTime = entry_point(innerIter)
-
-  for i in range(numIterations):
-    startTime, endTime = entry_point(innerIter)
-    milliseconds = int((endTime - startTime) * 1000)
-    print("DeltaBlue: iterations=%d runtime: %dms" % (i, milliseconds))
-
