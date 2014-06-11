@@ -32,11 +32,11 @@ class Variable:
   def add_constraint(self, constraint):
     self.constraints.append(constraint)
 
-  def stay(self, strength=Strength.WEAK):
+  def stay(self, strength = Strength.WEAK):
     if self.stay_constraint is not None:
       self.system.remove_constraint(self.stay_constraint)
 
-    self.stay_constraint = self.system.add_stay_constraint(self,strength)
+    self.stay_constraint = self.system.add_stay_constraint(self, strength)
 
   def removeStayConstraint(self):
     if self.stay_constraint is not None:
