@@ -13,6 +13,7 @@ sys.path.append("../src")
 
 from constraint_system_tests import *
 from variable_tests import *
+from constraint_tests import *
 from helper_method_tests import *
 from mvine_tests import *
 from exec_tests import *
