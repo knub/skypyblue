@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import sys, os
+import sys, os, time
 
 try:
   from termcolor import colored, cprint
