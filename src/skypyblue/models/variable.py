@@ -45,5 +45,5 @@ class Variable:
 
 
   def __repr__(self):
-    return "<Variable '%s', value: %s>" % (self.name, self.value)
+    return "<Variable '%s', value: %s>" % (self.name, self._value)
 

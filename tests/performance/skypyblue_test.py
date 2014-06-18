@@ -59,16 +59,17 @@ def projection_test(n):
   dests = []
   for i in range(n):
     src = Variable("src%s" % i, i, cs)
-    dst = Variable("dst%s" % i, i, cs)
-    dests.append(dst)
+    dest = Variable("dest%s" % i, i, cs)
+    dests.append(dest)
     src.stay()
-    cf.scale_constraint(dest, src, scale, offset, Strength.STRONG)
+    c = cf.scale_constraint(dest, src, scale, offset, Strength.STRONG)
+    cs.add_constraint(c)
 
   src.set_value(17)
-  if dst.get_value() != 1170:
+  if dest.get_value() != 1170:
     print("Projection 1 failed")
 
-  dst.set_value(1050)
+  dest.set_value(1050)
   if src.get_value() != 5:
     print("Projection 2 failed")
 

@@ -12,7 +12,7 @@ class ConstraintFactory:
       lambda v1, v2: v1 == v2,
       strength,
       [variable1, variable2],
-      [m1,m2])
+      [m1, m2])
 
     return constraint
 
