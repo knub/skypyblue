@@ -24,7 +24,7 @@ class Point(object):
 class MidpointTestClass(unittest.TestCase):
   __name__ = "MidpointTestClass"
   def setUp(self):
-    self.constraint_system =ConstraintSystem()
+    self.constraint_system = ConstraintSystem()
     self.point1 = self.constraint_system.create_variable("Point 1", Point(4, 10))
     self.point2 = self.constraint_system.create_variable("Point 2", Point(10, 30))
     self.midpoint = self.constraint_system.create_variable("midpoint", Point(0, 0))
