@@ -17,17 +17,17 @@ class ConstraintFactory:
       
       return constraint
 
-    def scale_constraint(self, variable1, variable2, variableX, variableY):
-      m1 = Method([variable2, variableX, variableY], [variable1],
-        lambda v2,vx,vy: vx*v2+vy)
+    def scale_constraint(self, destination, source, scale, offset, strength):
+      m1 = Method([source, scale, offset], [destination],
+        lambda source,scale,offset: scale*source+offset)
 
-      m2 = Method([variable1, variableX, variableY], [variable2],
-        lambda v1,vx,vy: (v1-vy)/vx)
+      m2 = Method([destination, scale, offset], [source],
+        lambda destination,scale,offset: float(destination-offset)/scale)
 
       constraint = Constraint(
-        lambda v1, v2, vx, vy: v1==vx*v2+vy,
+        lambda destination, source, scale, offset: destination==scale*source+offset,
         strength, 
-        [variable1, variable2, variableX, variableY], 
+        [destination, source, scale, offset], 
         [m1,m2])
       
       return constraint
