@@ -8,7 +8,7 @@ class ConstraintSystem:
     self.constraints = []
     self.variables = []
     self.forced_constraint = None
-    self.check_constraints = False
+    self.check_constraints = True
 
   def create_variables(self, names, initialValues):
     assert len(names) == len(initialValues)
@@ -95,7 +95,6 @@ class ConstraintSystem:
         exec_roots.append(variable)
 
       if skip:
-        self._check_constraints();
         return
 
       self.propagate_walk_strength(old_outputs)
