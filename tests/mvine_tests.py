@@ -39,7 +39,7 @@ class MVineTests(TestCase):
 
     m = Method([v1, v2], v3, None)
     cn.selected_method = m
-    v3.determined_by = m
+    v3.determined_by = cn
 
     new_mark()
     not_revoked = self.mvine.revoke_cn(cn)
@@ -64,12 +64,12 @@ class MVineTests(TestCase):
 
     m = Method([v1, v2], v3, None)
     cn.selected_method = m
-    v3.determined_by = m
+    v3.determined_by = cn
 
     mark = new_mark()
     cn.selected_method = m
     v3.walk_strength = Strength.WEAK
-    v3.determined_by = m
+    v3.determined_by = cn
     v3.mark = mark
     not_revoked = self.mvine.revoke_cn(cn)
 
@@ -77,7 +77,7 @@ class MVineTests(TestCase):
     self.assertEqual(Strength.WEAK, v1.walk_strength)
     self.assertEqual(Strength.WEAK, v2.walk_strength)
     self.assertEqual(Strength.WEAK, v3.walk_strength)
-    self.assertTrue (v3.determined_by is m)
+    self.assertTrue (v3.determined_by is cn)
     self.assertTrue (v3 not in self.mvine.redetermined_vars)
     self.assertTrue (cn.selected_method is None)
 
