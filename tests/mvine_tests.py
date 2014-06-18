@@ -23,7 +23,8 @@ class MVineTests(TestCase):
     cn.mark = new_mark()
 
     new_mark()
-    not_revoked = self.mvine.revoke_cn(cn, Strength.WEAKEST, [], [])
+    self.mvine.stack = []
+    not_revoked = self.mvine.revoke_cn(cn, Strength.WEAKEST, [])
 
     self.assertFalse(not_revoked)
     self.assertTrue(cn.mark is None)
@@ -43,7 +44,8 @@ class MVineTests(TestCase):
     redetermined_vars = []
 
     new_mark()
-    not_revoked = self.mvine.revoke_cn(cn, Strength.WEAKEST, [], redetermined_vars)
+    self.mvine.stack = []
+    not_revoked = self.mvine.revoke_cn(cn, Strength.WEAKEST, redetermined_vars)
 
     self.assertTrue (not_revoked)
     self.assertEqual(Strength.WEAK, v1.walk_strength)
@@ -61,7 +63,8 @@ class MVineTests(TestCase):
     v3.determined_by = m
     v3.mark = mark
     redetermined_vars = []
-    not_revoked = self.mvine.revoke_cn(cn, Strength.WEAKEST, [], redetermined_vars)
+    self.mvine.stack = []
+    not_revoked = self.mvine.revoke_cn(cn, Strength.WEAKEST, redetermined_vars)
 
     self.assertTrue (not_revoked)
     self.assertEqual(Strength.WEAK, v1.walk_strength)
@@ -74,7 +77,8 @@ class MVineTests(TestCase):
   # mvine_revoke_cn(cn, Strength.WEAKEST, new_mark(), [], [])
   def test_mvine_grow_with_empty_stack(self):
     new_mark()
-    self.assertTrue(self.mvine.grow(Strength.WEAKEST, [], []))
+    self.mvine.stack = []
+    self.assertTrue(self.mvine.grow(Strength.WEAKEST, []))
 
   def test_mvine_grow_with_marked_constraints(self):
     cn1 = Constraint(None, Strength.WEAKEST, [], [])
@@ -88,16 +92,16 @@ class MVineTests(TestCase):
     cn2 = Constraint(None, Strength.WEAKEST, [], [])
     self.mvine.revoke_cn = Mock(return_value = True)
     self.mvine.revoke_cn = Mock(return_value = False)
-    stack = [cn2, cn1]
-    self.assertFalse(self.mvine.grow(Strength.MEDIUM, stack, []))
+    self.mvine.stack = [cn2, cn1]
+    self.assertFalse(self.mvine.grow(Strength.MEDIUM, []))
 
   def test_mvine_grow_with_(self):
     cn1 = Constraint(None, Strength.WEAKEST, [], [])
     cn2 = Constraint(None, Strength.REQUIRED, [], [])
     cn1.mark = new_mark()
     self.mvine.enforce_cn = Mock(return_value = False)
-    stack = [cn2, cn1]
-    self.assertFalse(self.mvine.grow(Strength.MEDIUM, stack, []))
+    self.mvine.stack = [cn2, cn1]
+    self.assertFalse(self.mvine.grow(Strength.MEDIUM, []))
 
 
   def test_mvine_enforce_cn_with_no_methods_fails(self):
@@ -105,7 +109,8 @@ class MVineTests(TestCase):
     cn.mark = new_mark()
     self.mvine.possible_method = Mock(return_value = False)
     new_mark()
-    self.assertFalse(self.mvine.enforce_cn(cn, Strength.WEAKEST, [], []))
+    self.mvine.stack = []
+    self.assertFalse(self.mvine.enforce_cn(cn, Strength.WEAKEST, []))
     self.assertTrue(cn.mark is None)
 
   def test_mvine_enforce_cn_fails(self):
@@ -117,7 +122,8 @@ class MVineTests(TestCase):
     cn.mark = new_mark()
     self.mvine.possible_method = Mock(return_value = False)
     new_mark()
-    self.assertFalse(self.mvine.enforce_cn(cn, Strength.WEAKEST, [], []))
+    self.mvine.stack = []
+    self.assertFalse(self.mvine.enforce_cn(cn, Strength.WEAKEST, []))
     self.assertTrue(cn.mark is None)
 
 
