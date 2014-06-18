@@ -96,8 +96,7 @@ class ConstraintSystem:
       unenforced_constraints = list(
         filter(lambda c: c != cn, unenforced_constraints))
       redetermined_vars = []
-      ok = Mvine(self.marker).build(cn, redetermined_vars)
-      if not ok:
+      if not Mvine(self.marker).build(cn, redetermined_vars):
         return exec_roots
       self.propagate_walk_strength([cn] + redetermined_vars)
       self.collect_unenforced(unenforced_constraints, redetermined_vars, cn.strength, False)
