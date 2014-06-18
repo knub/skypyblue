@@ -8,7 +8,7 @@ class ConstraintSystem:
     self.constraints = []
     self.variables = []
     self.forced_constraint = None
-    self.check_constraints = True
+    self.check_constraints = False
 
   def create_variables(self, names, initialValues):
     assert len(names) == len(initialValues)
