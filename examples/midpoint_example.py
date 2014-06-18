@@ -47,7 +47,9 @@ def main():
   clock = pygame.time.Clock()
   # Die Schleife, und damit unser Spiel, laeuft solange running == True.
   running = 1
+  c = 0
   while running:
+    c = (c + 1) % 50
     # Framerate auf 30 Frames pro Sekunde beschraenken.
     # Pygame wartet, falls das Programm schneller laeuft.
     clock.tick(30)
@@ -60,7 +62,8 @@ def main():
       quit_on_escape(event)
       handle_mouse_event(event)
     pygame.display.flip()
-    draw_lines(surface)
+    if c != 0:
+      draw_lines(surface)
 
 def quit_on_escape(event):
   if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
@@ -110,7 +113,7 @@ def create_constraints():
         pm[0] + (p4[0] - p3[0]),
         pm[1] + (p4[1] - p3[1])
       ]
-      )
+    )
   )
   mp1pmp3 = Method([p1_var, pm_var, p3_var], [p2_var, p4_var],
     lambda p1, pm, p3: (
@@ -122,7 +125,7 @@ def create_constraints():
         p3[0] + (pm[0] - p1[0]),
         p3[1] + (pm[1] - p1[1])
       ]
-      )
+    )
   )
   mpmp2p4 = Method([pm_var, p2_var, p4_var], [p1_var, p3_var],
     lambda pm, p2, p4: (
@@ -134,7 +137,7 @@ def create_constraints():
         p4[0] + (pm[0] - p2[0]),
         p4[1] + (pm[1] - p2[1])
       ]
-      )
+    )
   )
 
 
@@ -142,13 +145,13 @@ def create_constraints():
     lambda p1, p2, p3, p4, pm: is_midpoint(p1, p2, pm) and
                          length(p1, pm) == length(p3, p4),
     Strength.STRONG,
-    [p1_var, p2_var, p3_var, p4_var,pm_var],
+    [p1_var, p2_var, p3_var, p4_var, pm_var],
     [mpmp3p4, mp1pmp3, mpmp2p4])
   
   cs.add_constraint(constraint)
 
-  p3_var.stay()
-  p4_var.stay()
+  # p3_var.stay()
+  # p4_var.stay()
  
 
 if __name__ == '__main__':
