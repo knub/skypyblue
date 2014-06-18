@@ -3,7 +3,7 @@ from skypyblue.models import Strength
 class Variable:
   def __init__(self, name, value, system, walk_strength = Strength.WEAKEST):
     self.name = name
-    self.value = value
+    self._value = value
     self.constraints = []
     self.determined_by = None
     self.walk_strength = walk_strength
@@ -19,15 +19,15 @@ class Variable:
     return pplan
 
   def get_value(self):
-    return self.value
+    return self._value
 
-  def set_value(self, value):
-    self.value = value
-    if self.system is not None:
+  def set_value(self, value, triggerChange = True):
+    self._value = value
+    if self.system is not None and triggerChange:
       self.system.variable_changed(self)
 
   def remove_constraint(self,constraint):
-      self.constraints=[cn for cn in self.constraints if cn!=constraint]
+      self.constraints = [cn for cn in self.constraints if cn != constraint]
 
   def add_constraint(self, constraint):
     self.constraints.append(constraint)

@@ -25,9 +25,9 @@ class Method:
     return self.in_vars
 
   def execute(self):
-    out = self.method(*[var.value for var in self.in_vars])
-    if(len(self.out_vars)==1):
-      self.out_vars[0].value = out;
+    out = self.method(*[var.get_value() for var in self.in_vars])
+    if len(self.out_vars) == 1:
+      self.out_vars[0].set_value(out, triggerChange = False);
     else:
       for i in range(len(self.out_vars)):
-        self.out_vars[i].value = out[i]
+        self.out_vars[i].set_value(out[i], triggerChange = False)

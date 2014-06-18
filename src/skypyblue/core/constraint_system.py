@@ -1,7 +1,6 @@
 from skypyblue.models import Variable, Method, Constraint, Strength, InternalStrength
 from skypyblue.core import Mvine, Marker
 import pdb;
-
 class ConstraintSystem:
 
   def __init__(self):
@@ -9,6 +8,7 @@ class ConstraintSystem:
     self.constraints = []
     self.variables = []
     self.forced_constraint = None
+    self.check_constraints = False
 
   def create_variables(self, names, initialValues):
     assert len(names) == len(initialValues)
@@ -42,10 +42,10 @@ class ConstraintSystem:
     self.add_constraint(cn)
 
   def variable_changed(self, var):
-    self.change_variable_values([var], [var.value])
+    self.change_variable_values([var], [var.get_value()])
 
   def add_stay_constraint(self, variable, strength):
-    m = Method([], [variable], lambda: variable.value)
+    m = Method([], [variable], lambda: variable.get_value())
     stay_constraint = Constraint(
       lambda x: True,
       strength,

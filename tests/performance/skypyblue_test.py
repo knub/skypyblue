@@ -61,7 +61,7 @@ def projection_test(n):
     src = Variable("src%s" % i, i, cs)
     dst = Variable("dst%s" % i, i, cs)
     dests.append(dst)
-    cs.add_stay_constraint(src)
+    src.stay()
     cf.scale_constraint(dest, src, scale, offset, Strength.STRONG)
 
   src.set_value(17)
