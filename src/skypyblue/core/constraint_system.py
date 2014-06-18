@@ -72,7 +72,7 @@ class ConstraintSystem:
 
     for variable in constraint.variables:
       variable.add_constraint(constraint)
-    exec_roots = self.update_method_graph([constraint])
+    exec_roots = self.update_method_graph(set([constraint]))
     self.exec_from_roots(exec_roots)
 
     self.constraints.append(constraint)
@@ -98,8 +98,8 @@ class ConstraintSystem:
         return
 
       self.propagate_walk_strength(old_outputs)
-      unenforcedConstraints = []
-      self.collect_unenforced(unenforcedConstraints, old_outputs,constraint.strength,True)
+      unenforcedConstraints = set()
+      self.collect_unenforced(unenforcedConstraints, old_outputs, constraint.strength, True)
       exec_roots.extend(self.update_method_graph(unenforcedConstraints))
       self.exec_from_roots(exec_roots)
 
@@ -109,7 +109,7 @@ class ConstraintSystem:
     exec_roots = []
     while unenforced_constraints:
       cn = self.strongest_constraint(unenforced_constraints)
-      unenforced_constraints = [c for c in unenforced_constraints if c != cn]
+      unenforced_constraints.remove(cn)
       redetermined_vars = []
       if not Mvine(self.marker).build(cn, redetermined_vars):
         return exec_roots
@@ -122,12 +122,10 @@ class ConstraintSystem:
     return exec_roots
 
   def strongest_constraint(self, constraints):
-    constraints.sort(key = lambda cn: cn.strength, reverse = True)
-    return constraints[0]
+    return sorted(constraints, key = lambda cn: cn.strength, reverse = True)[0]
 
   def weakest_constraint(self, constraints):
-    constraints.sort(key=lambda cn: cn.strength)
-    return constraints[0]
+    return sorted(constraints, key = lambda cn: cn.strength)[0]
 
   def propagate_walk_strength(self, roots):
     self._new_mark()
@@ -160,10 +158,7 @@ class ConstraintSystem:
   def collect_unenforced(self, unenforced_cns, vars, collection_strength, collect_equal_strength):
     self._new_mark()
     for var in vars:
-      collected = self.collect_unenforced_mark(unenforced_cns, var, collection_strength, collect_equal_strength)
-      for val in set(collected):
-        if val not in unenforced_cns:
-          unenforced_cns.append(val)
+      unenforced_cns.union(self.collect_unenforced_mark(unenforced_cns, var, collection_strength, collect_equal_strength))
     return unenforced_cns
 
   def collect_unenforced_mark(self, unenforced_cns, var, collection_strength, collect_equal_strength):
@@ -175,7 +170,7 @@ class ConstraintSystem:
             self.collect_unenforced_mark(unenforced_cns, out_var, collection_strength, collect_equal_strength)
         elif Strength.weaker(cn.strength, collection_strength) or \
               (collect_equal_strength and (cn.strength == collection_strength)):
-          unenforced_cns.append(cn)
+          unenforced_cns.add(cn)
     return unenforced_cns
 
 
