@@ -13,6 +13,7 @@ digraph G {
 	"mvine-grow" [fillcolor="#73C764"];
 	"mvine-revoke-cn" [fillcolor="#73C764"];
 	"mvine-enforce-cn" [fillcolor="#73C764"];
+	"pplan-add" [fillcolor="#73C764"];
 
 	"add-constraint" -> "update-method-graph";
 	"add-constraint" -> "exec-from-roots";
