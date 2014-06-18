@@ -1,4 +1,7 @@
 import inspect
+from time import time
+
+
 class Constraint:
   def __init__(self, check_function, strength, variables, methods):
     """
@@ -22,14 +25,22 @@ class Constraint:
     self.selected_method = None
     self.mark = None
 
-  def add_to_pplan(self, pplan, done_mark):
+  def add_to_pplan(self, pplan, pplan_as_set, done_mark):
     if self.is_enforced() and self.mark != done_mark:
       self.mark = done_mark
       for var in self.selected_method.outputs:
-        var.add_to_pplan(pplan, done_mark)
-      if self not in pplan:
+        var.add_to_pplan(pplan, pplan_as_set, done_mark)
+
+      # this is a really slow operation!
+      # thats why we use the set representation of the
+      # pplan to make this check fast.
+      # nevertheless, we cannot use only a set, because
+      # the ordering is important!
+      if self not in pplan_as_set:
         pplan.append(self)
+        pplan_as_set.add(self)
     return pplan
+
 
   def is_enforced(self):
     "returns True is there is is a method selected, otherwise False"
@@ -41,4 +52,3 @@ class Constraint:
 
   def __repr__(self):
     return str(self)
-

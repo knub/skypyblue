@@ -1,6 +1,6 @@
 from skypyblue.models import Variable, Method, Constraint, Strength, InternalStrength
 from skypyblue.core import Mvine, Marker
-import pdb;
+
 class ConstraintSystem:
 
   def __init__(self):
@@ -64,7 +64,7 @@ class ConstraintSystem:
       [m])
 
     self.add_constraint(stay_constraint)
-    return stay_constraint;
+    return stay_constraint
 
   def add_constraint(self, constraint):
     constraint.selected_method = None
@@ -103,7 +103,7 @@ class ConstraintSystem:
       exec_roots.extend(self.update_method_graph(unenforcedConstraints))
       self.exec_from_roots(exec_roots)
 
-    self._check_constraints();
+    self._check_constraints()
 
   def update_method_graph(self, unenforced_constraints):
     exec_roots = []
@@ -180,19 +180,17 @@ class ConstraintSystem:
 
 
   def exec_pplan_create(self, exec_roots):
-    exec_pplan = []
+    cn_pplan = []
+    var_pplan = []
+    for cn_or_var in exec_roots:
+      if isinstance(cn_or_var, Constraint):
+        cn_or_var.add_to_pplan(cn_pplan, set(cn_pplan), self.mark)
+      elif isinstance(cn_or_var, Variable):
+        if cn_or_var.determined_by is None and not cn_or_var.valid:
+          cn_or_var.add_to_pplan(var_pplan, set(var_pplan), self.mark)
+          cn_or_var.valid = True
 
-    for cn in exec_roots:
-      if isinstance(cn, Constraint):
-        cn.add_to_pplan(exec_pplan, self.mark)
-
-    for var in exec_roots:
-      if isinstance(var, Variable):
-        if var.determined_by is None and not var.valid:
-          exec_pplan.extend(var.add_to_pplan([], self.mark))
-          var.valid = True
-
-    return exec_pplan
+    return cn_pplan + var_pplan
 
   def exec_from_roots(self, exec_roots):
     self._new_mark()
@@ -230,7 +228,7 @@ class ConstraintSystem:
     if not isinstance(objs, list):
       raise Exception("accepting only list of objs!")
     for el in objs:
-      el.add_to_pplan(pplan, self.mark)
+      el.add_to_pplan(pplan, set(pplan), self.mark)
     return pplan
 
   def _new_mark(self):

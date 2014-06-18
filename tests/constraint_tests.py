@@ -28,7 +28,7 @@ class ConstraintTests(TestCase):
     self.assertIsNone(self.cn.mark)
 
     mark = self.cs.marker.new_mark()
-    pplan = self.cn.add_to_pplan([], mark)
+    pplan = self.cn.add_to_pplan([], set(), mark)
 
     self.assertEqual([self.cn], pplan)
     self.assertEqual(mark, self.cn.mark)
@@ -37,7 +37,7 @@ class ConstraintTests(TestCase):
     self.cn.is_enforced = Mock(return_value = False)
     self.assertIsNone(self.cn.mark)
 
-    pplan = self.cn.add_to_pplan([], self.cs.marker.new_mark())
+    pplan = self.cn.add_to_pplan([], set(), self.cs.marker.new_mark())
 
     self.assertEqual([], pplan)
     self.assertIsNone(self.cn.mark)
@@ -47,7 +47,7 @@ class ConstraintTests(TestCase):
 
     mark = self.cs.marker.new_mark()
     self.cn.mark = mark
-    pplan = self.cn.add_to_pplan([], mark)
+    pplan = self.cn.add_to_pplan([], set(), mark)
 
     self.assertEqual([], pplan)
     self.assertEqual(mark, self.cn.mark)
@@ -58,7 +58,7 @@ class ConstraintTests(TestCase):
     mark1 = self.cs.marker.new_mark()
     mark2 = self.cs.marker.new_mark()
     self.cn.mark = mark1
-    pplan = self.cn.add_to_pplan([], mark2)
+    pplan = self.cn.add_to_pplan([], set(), mark2)
 
     self.assertEqual([self.cn], pplan)
     self.assertEqual(mark2, self.cn.mark)
