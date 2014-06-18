@@ -71,11 +71,7 @@ class Mvine:
     return False
 
   def all_constraints_that_determine_a_var_in(self, variables):
-    constraints = set()
-    for variable in variables:
-      if variable.determined_by != None:
-        constraints.add(variable.determined_by)
-    return constraints
+    return set([var.determined_by for var in variables if var.determined_by is not None])
 
   def possible_method(self, mt, cn):
     for var in mt.outputs:
