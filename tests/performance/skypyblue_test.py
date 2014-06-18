@@ -58,15 +58,31 @@ def projection_test(n):
   src, dest = None, None
   dests = []
   for i in range(n):
-    src = Variable("src%s" % i, i)
-    dst = Variable("dst%s" % i, i)
+    src = Variable("src%s" % i, i, cs)
+    dst = Variable("dst%s" % i, i, cs)
     dests.append(dst)
     cs.add_stay_constraint(src)
     cf.scale_constraint(dest, src, scale, offset, Strength.STRONG)
 
   src.set_value(17)
-  if dst.value != 1170:
+  if dst.get_value() != 1170:
     print("Projection 1 failed")
+
+  dst.set_value(1050)
+  if src.get_value() != 5:
+    print("Projection 2 failed")
+
+  scale.set_value(5)
+
+  for i in range(n - 1):
+    if dests[i].get_value() != (i * 5 + 1000):
+      print("Projection 3 failed")
+
+  offset.set_value(2000)
+
+  for i in range(n - 1):
+    if dests[i].get_value() != (i * 5 + 2000):
+      print("Projection 4 failed")
 
 def skypyblue(innerIter):
   chain_test(innerIter)
