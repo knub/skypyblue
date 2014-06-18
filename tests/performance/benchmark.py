@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
-import sys
-from termcolor import colored, cprint
+import sys, os
+try:
+  from termcolor import colored, cprint
+except:
+  def cprint(s, attrs):
+    print(s)
 
 from deltablue_test import *
 from skypyblue_test import *
@@ -19,9 +23,9 @@ def benchmark(constraint_solver):
 
 if len(sys.argv) < 4:
   numIterations = 5
-  warmUp        = 0
-  innerIter     = 10
-  print("Not all parameters specified. Using default parameters %d %d %d" %
+  warmUp        = 5
+  innerIter     = 100
+  print("Not all parameters specified. Using default parameters n: %d warm: %d constraints: %d" %
     (numIterations, warmUp, innerIter))
 else:
   # outer iterations
