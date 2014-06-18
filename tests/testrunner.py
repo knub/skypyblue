@@ -23,7 +23,6 @@ from update_method_graph_tests import *
 from constraint_tests import *
 from constraint_factory_tests import *
 
-import performance.benchmark
-performance.benchmark.run_benchmark([2, 0, 50])
+from benchmark import *
+run_benchmark([2, 0, 50])
 unittest.main()
-
