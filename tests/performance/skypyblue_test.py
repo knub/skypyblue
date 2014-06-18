@@ -33,7 +33,7 @@ def chain_test(n):
 
     prev = v
 
-  cs.add_stay_constraint(last, Strength.MEDIUM)
+  last.stay()
 
   for i in range(100):
     first.set_value(i)
