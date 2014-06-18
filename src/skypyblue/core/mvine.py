@@ -51,8 +51,7 @@ class Mvine:
           self.stack.append(new_cn)
         for var in mt.outputs:
           var.mark = self.mark
-        ok = self.grow(redetermined_vars)
-        if ok:
+        if self.grow(redetermined_vars):
           if not cn.selected_method is None:
             for var in cn.selected_method.outputs:
               if var.mark != self.mark:

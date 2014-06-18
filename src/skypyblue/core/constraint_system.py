@@ -93,8 +93,7 @@ class ConstraintSystem:
     exec_roots = []
     while unenforced_constraints:
       cn = self.strongest_constraint(unenforced_constraints)
-      unenforced_constraints = list(
-        filter(lambda c: c != cn, unenforced_constraints))
+      unenforced_constraints = [c for c in unenforced_constraints if c != cn]
       redetermined_vars = []
       if not Mvine(self.marker).build(cn, redetermined_vars):
         return exec_roots
