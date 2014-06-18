@@ -45,7 +45,7 @@ class Mvine:
   def enforce_cn(self, cn, redetermined_vars):
     cn.mark = self.mark
     for mt in cn.methods:
-      if self.possible_method(mt, cn):
+      if self.is_possible_method(mt, cn):
         next_cns = self.all_constraints_that_determine_a_var_in(mt.outputs)
         for new_cn in next_cns:
           self.stack.append(new_cn)
@@ -73,12 +73,12 @@ class Mvine:
   def all_constraints_that_determine_a_var_in(self, variables):
     return set([var.determined_by for var in variables if var.determined_by is not None])
 
-  def possible_method(self, mt, cn):
+  def is_possible_method(self, mt, cn):
     for var in mt.outputs:
-      if var.mark == self.mark: return False
-      if not Strength.weaker(var.walk_strength, self.root_strength):
-        if cn.selected_method == None:
-          return False
-        if not var in cn.selected_method.outputs:
-          return False
+      # boolean expression: A or (B and (C or D))
+      if var.mark == self.mark or \
+      (var.walk_strength >= self.root_strength and \
+      (cn.selected_method == None or \
+        var not in cn.selected_method.outputs)):
+        return False
     return True

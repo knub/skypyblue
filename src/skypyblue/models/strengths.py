@@ -11,10 +11,18 @@ class Strength(IntEnum):
   def weaker(strength1, strength2):
     return strength1 < strength2
 
+  @staticmethod
+  def stronger(strength1, strength2):
+    return strength1 >= strength2
+
 class InternalStrength(IntEnum):
   FORCED = 6
 
   @staticmethod
   def weaker(strength1, strength2):
     return strength1 < strength2
+
+  @staticmethod
+  def stronger(strength1, strength2):
+    return strength1 >= strength2
 
