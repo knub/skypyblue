@@ -115,15 +115,12 @@ class ConstraintSystem:
 
   def propagate_walk_strength(self, roots):
     self._new_mark()
-    walk_pplan = self.pplan_add(roots)
 
-    while walk_pplan:
-      cn = walk_pplan.pop()
+    for cn in self.pplan_add(roots):
       if self.any_immediate_upstream_marked(cn):
-        for var  in cn.selected_method.inputs:
-          if var.determined_by != None:
-            if var.determined_by.mark == self.mark:
-              var.walk_strength = Strength.WEAKEST
+        for var in cn.selected_method.inputs:
+          if var.determined_by is not None and var.determined_by.mark == self.mark:
+            var.walk_strength = Strength.WEAKEST
       self.compute_walkabout_strengths(cn)
       cn.mark = None
 
