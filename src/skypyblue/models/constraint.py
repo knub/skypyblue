@@ -1,6 +1,4 @@
 import inspect
-from time import time
-
 
 class Constraint:
   def __init__(self, check_function, strength, variables, methods):
