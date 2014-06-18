@@ -180,10 +180,8 @@ class ConstraintSystem:
 
   def exec_from_roots(self, exec_roots):
     self._new_mark()
-    exec_pplan = self.exec_pplan_create(exec_roots)
 
-    while exec_pplan:
-      cn = exec_pplan.pop()
+    for cn in reversed(self.exec_pplan_create(exec_roots)):
       if cn.mark == self.mark:
         if self.any_immediate_upstream_marked(cn):
           self.exec_from_cycle(cn)
@@ -192,12 +190,11 @@ class ConstraintSystem:
           self.execute_propagate_valid(cn)
 
   def execute_propagate_valid(self, cn):
-    inputs_valid = True
-    for var in cn.selected_method.inputs:
-      if not var.valid:
-        inputs_valid = False
+    inputs_valid = not cn.selected_method.has_invalid_vars()
+
     if inputs_valid:
       cn.selected_method.execute()
+
     for var in cn.selected_method.outputs:
       var.valid = inputs_valid
 
