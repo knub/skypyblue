@@ -36,8 +36,8 @@ class Constraint:
     return not self.selected_method is None
 
   def __str__(self):
-    return "<Constraint check: %s>" % (
-      inspect.getsource(self.check_function).strip())
+    return "<Constraint %s>" % (
+      inspect.getsource(self.check_function).strip().strip(","))
 
   def __repr__(self):
     return str(self)
