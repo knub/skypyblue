@@ -227,52 +227,33 @@ class ConstraintSystem:
   def mark(self):
     return self.marker.mark
 
-  # def extract_plan(self, root_cns):
-  #   good_cns = []
-  #   bad_cns = []
-  #   self._new_mark()
-  #   pplan = self.pplan_add([], root_cns)
+  # create-valid-plan in now Plan(....)
+  # invalidate-constraint-plans is now constraint.invalidate_plans()
+  # invalidate_plans_on_setting_method moved to constraint
+  def extract_plan(self, root_cns):
+    good_cns = []
+    bad_cns = []
+    self._new_mark()
+    pplan = self.pplan_add([], root_cns)
 
-  #   while pplan:
-  #     cn = pplan.pop()
-  #     if cn.mark != self.mark:
-  #       pass
-  #     elif self.any_immediate_upstream_marked(cn):
-  #       bad_cns.append(cn)
-  #     else:
-  #       cn.mark = None
-  #       good_cns.append(cn)
-  #   return self.create_valid_plan(root_cns, good_cns, bad_cns)
+    while pplan:
+      cn = pplan.pop()
+      if cn.mark != self.mark:
+        pass
+      elif self.any_immediate_upstream_marked(cn):
+        bad_cns.append(cn)
+      else:
+        cn.mark = None
+        good_cns.append(cn)
+    return self.Plan(root_cns, good_cns, bad_cns, True)
 
-  # def create_valid_plan(self, root_cns, good_cns, bad_cns):
-  #   plan = Plan(root_cns, good_cns, bad_cns)
-  #   for cns in [root_cns, good_cns, bad_cns]:
-  #     for cn in cns:
-  #       cn.valid_plans.append(plan)
-  #   return plan
 
-  # def invalidate_plans_on_setting_method(self, cn, new_mt):
-  #   self.invalidate_constraint_plans(cl.valid_plans)
-  #   if new_mt != None:
-  #     for var in new_mt.inputs:
-  #       if var.determined_by != None:
-  #         self.invalidate_constraint_plans(var.determined_by)
-
-  # def invalidate_constraint_plans(self, invalid_cn):
-  #   for plan in invalid_cn.valid_plans:
-  #     plan.valid = False
-  #     for cns in [plan.good_cns, plan.bad_cns, plan.root_cns]:
-  #       for cn in cns:
-  #         if cn != invalid_cn:
-  #           cn.valid_plans.remove(plan)
-  #   invalid_cn.valid_plans.clear()
-
-  # def execute_plan(self, plan):
-  #   if plan.valid:
-  #     for cn in plan.good_cns:
-  #       self.execute_propagate_valid(cn)
-  #   else:
-  #     raise ValueError("trying to execute invalid plan")
+  def execute_plan(self, plan):
+    if plan.valid:
+      for cn in plan.good_cns:
+        self.execute_propagate_valid(cn)
+    else:
+      raise ValueError("trying to execute invalid plan")
 
 
   def max_out(self, mt, current_outputs):
