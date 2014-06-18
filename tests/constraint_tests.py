@@ -10,12 +10,12 @@ class ConstraintTests(TestCase):
 
   def setUp(self):
     self.cs = ConstraintSystem()
-    self.vars = self.cs.create_variables(["v1", "v2", "v3"], [4,5,3])
+    self.vars = self.cs.create_variables(["v1", "v2", "v3"], [4, 5, 3])
     self.v1, self.v2, self.v3 = self.vars
     m1_2 = Method(self.v1, self.v2, lambda x: x // 2)
     m1_3 = Method(self.v1, self.v3, lambda x: x // 3)
 
-    self.cn = Constraint(lambda: True, Strength.STRONG, self.vars, [m1_3, m1_2])
+    self.cn = Constraint(lambda v1, v2, v3: True, Strength.STRONG, self.vars, [m1_3, m1_2])
 
     self.cs.add_constraint(self.cn)
 
