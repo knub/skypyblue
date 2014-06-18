@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import sys, os
+
 try:
   from termcolor import colored, cprint
 except:
@@ -25,7 +26,8 @@ if len(sys.argv) < 4:
   numIterations = 5
   warmUp        = 5
   innerIter     = 100
-  print("Not all parameters specified. Using default parameters n: %d warm: %d constraints: %d" %
+  print("Not all parameters specified. Using default parameters " +
+    "n: %d warm: %d constraints: %d" %
     (numIterations, warmUp, innerIter))
 else:
   # outer iterations
