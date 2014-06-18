@@ -8,7 +8,7 @@ class ConstraintSystem:
     self.constraints = []
     self.variables = []
     self.forced_constraint = None
-    self.check_constraints = False
+    self.check_constraints = True
 
   def create_variables(self, names, initialValues):
     assert len(names) == len(initialValues)
@@ -17,6 +17,7 @@ class ConstraintSystem:
       res.append(self.create_variable(names[i], initialValues[i]))
     return res
 
+  # TODO: Remove these
   def create_variable(self, name, initialValue):
     variable = Variable(name, initialValue, self)
     self.variables.append(variable)
@@ -44,6 +45,16 @@ class ConstraintSystem:
   def variable_changed(self, var):
     self.change_variable_values([var], [var.get_value()])
 
+  def _check_constraints(self):
+    if self.check_constraints == False:
+      return
+    for constraint in self.constraints:
+      if not constraint.is_enforced():
+        continue
+      check = constraint.check_function(*[var.get_value() for var in constraint.variables])
+      if not check:
+        raise Exception("Constraint %s is not satisfied" % constraint)
+
   def add_stay_constraint(self, variable, strength):
     m = Method([], [variable], lambda: variable.get_value())
     stay_constraint = Constraint(
@@ -55,7 +66,6 @@ class ConstraintSystem:
     self.add_constraint(stay_constraint)
     return stay_constraint;
 
-
   def add_constraint(self, constraint):
     constraint.selected_method = None
     constraint.mark = None
@@ -65,9 +75,14 @@ class ConstraintSystem:
     exec_roots = self.update_method_graph([constraint])
     self.exec_from_roots(exec_roots)
 
+    self.constraints.append(constraint)
+    self._check_constraints();
+
   def remove_constraint(self, constraint, skip = False):
     for variable in constraint.variables:
       variable.remove_constraint(constraint)
+
+    self.constraints.remove(constraint)
 
     if constraint.is_enforced():
       old_outputs = constraint.selected_method.outputs
@@ -80,6 +95,7 @@ class ConstraintSystem:
         exec_roots.append(variable)
 
       if skip:
+        self._check_constraints();
         return
 
       self.propagate_walk_strength(old_outputs)
@@ -88,6 +104,7 @@ class ConstraintSystem:
       exec_roots.extend(self.update_method_graph(unenforcedConstraints))
       self.exec_from_roots(exec_roots)
 
+    self._check_constraints();
 
   def update_method_graph(self, unenforced_constraints):
     exec_roots = []
