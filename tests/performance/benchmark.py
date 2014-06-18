@@ -11,7 +11,7 @@ from deltablue_test import *
 from skypyblue_test import *
 
 
-def benchmark(constraint_solver):
+def benchmark(constraint_solver, warmUp, numIterations):
   for i in range(warmUp):
     constraint_solver()
 
@@ -22,26 +22,29 @@ def benchmark(constraint_solver):
     milliseconds = int((endTime - startTime) * 1000)
     print("iterations=%d runtime: %dms" % (i, milliseconds))
 
-if len(sys.argv) < 4:
-  numIterations = 5
-  warmUp        = 5
-  innerIter     = 100
-  print("Not all parameters specified. Using default parameters " +
-    "n: %d warm: %d constraints: %d" %
-    (numIterations, warmUp, innerIter))
-else:
-  # outer iterations
-  numIterations = int(sys.argv[1])
-  # outer warmup iterations
-  warmUp        = int(sys.argv[2])
-  # test size
-  innerIter     = int(sys.argv[3])
+def run_benchmark(args):
+  if len(args) < 3:
+    numIterations = 5
+    warmUp        = 5
+    innerIter     = 100
+    print("Not all parameters specified. Using default parameters " +
+      "n: %d warm: %d constraints: %d" %
+      (numIterations, warmUp, innerIter))
+  else:
+    # outer iterations
+    numIterations = int(args[0])
+    # outer warmup iterations
+    warmUp        = int(args[1])
+    # test size
+    innerIter     = int(args[2])
 
-print()
-cprint("Deltablue results", attrs = ['bold'])
-cprint("================================", attrs = ['bold'])
-benchmark(lambda: delta_blue(innerIter))
+  cprint("Deltablue results", attrs = ['bold'])
+  cprint("================================", attrs = ['bold'])
+  benchmark(lambda: delta_blue(innerIter), warmUp, numIterations)
 
-cprint("Skypyblue results", attrs = ['bold'])
-cprint("================================", attrs = ['bold'])
-benchmark(lambda: skypyblue(innerIter))
+  cprint("Skypyblue results", attrs = ['bold'])
+  cprint("================================", attrs = ['bold'])
+  benchmark(lambda: skypyblue(innerIter), warmUp, numIterations)
+
+if __name__ == "__main__":
+  run_benchmark(sys.argv[1:])
