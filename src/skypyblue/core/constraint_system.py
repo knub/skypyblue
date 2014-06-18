@@ -85,7 +85,7 @@ class ConstraintSystem:
       self.propagate_walk_strength(old_outputs)
       unenforcedConstraints = []
       self.collect_unenforced(unenforcedConstraints, old_outputs,constraint.strength,True)
-      exec_roots = self.update_method_graph(unenforcedConstraints)
+      exec_roots.extend(self.update_method_graph(unenforcedConstraints))
       self.exec_from_roots(exec_roots)
 
 
@@ -175,7 +175,7 @@ class ConstraintSystem:
 
     for var in exec_roots:
       if isinstance(var, Variable):
-        if var.determined_by == None and not var.valid:
+        if var.determined_by is None and not var.valid:
           exec_pplan.extend(var.add_to_pplan([], self.mark))
           var.valid = True
 
@@ -187,15 +187,12 @@ class ConstraintSystem:
 
     while exec_pplan:
       cn = exec_pplan.pop()
-      if cn.mark != self.mark:
-        # this cn has already been processed: do nothing
-        # WTF?
-        continue
-      elif self.any_immediate_upstream_marked(cn):
-        self.exec_from_cycle(cn)
-      else:
-        cn.mark = None
-        self.execute_propagate_valid(cn)
+      if cn.mark == self.mark:
+        if self.any_immediate_upstream_marked(cn):
+          self.exec_from_cycle(cn)
+        else:
+          cn.mark = None
+          self.execute_propagate_valid(cn)
 
   def execute_propagate_valid(self, cn):
     inputs_valid = True
