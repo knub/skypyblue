@@ -1,6 +1,9 @@
 from skypyblue.models import Variable, Method, Constraint, Strength, InternalStrength
 from skypyblue.core import Mvine, Marker
 
+import pdb;
+
+# https://www.cs.washington.edu/research/constraints/solvers/skyblue-cycles.html
 class ConstraintSystem:
 
   def __init__(self):
