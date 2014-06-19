@@ -140,26 +140,20 @@ class ConstraintSystem:
     self._new_mark()
 
     for cn in self.pplan_add(roots):
-      if self.any_immediate_upstream_marked(cn):
-        for var in cn.selected_method.inputs:
-          if var.determined_by is not None and var.determined_by.mark == self.mark:
-            var.walk_strength = Strength.WEAKEST
+      # there is done the same check as here. TODO: delete the uncommented
+      # if self.any_immediate_upstream_marked(cn):
+      for var in cn.selected_method.inputs:
+        if var.determined_by is not None and var.determined_by.mark == self.mark:
+          var.walk_strength = Strength.WEAKEST
       self.compute_walkabout_strengths(cn)
       cn.mark = None
 
-  def any_immediate_upstream_marked(self, cn):
-    for var in cn.selected_method.inputs:
-        if var.determined_by != None and var.determined_by.mark == self.mark:
-          return True
-    return False
-
   def compute_walkabout_strengths(self, cn):
-    current_outputs = cn.selected_method.outputs
-    for out_var in current_outputs:
+    for out_var in cn.selected_method.outputs:
       min_strength = cn.strength
       for mt in cn.methods:
-        if not out_var in mt.outputs:
-          max_strength = self.max_out(mt, current_outputs)
+        if out_var not in mt.outputs:
+          max_strength = self.max_out(mt, cn.selected_method.outputs)
           if Strength.weaker(max_strength, min_strength):
             min_strength = max_strength
       out_var.walk_strength = min_strength
@@ -180,17 +174,24 @@ class ConstraintSystem:
               (collect_equal_strength and (cn.strength == collection_strength)):
           self.unenforced_constraints.add(cn)
 
+  def any_immediate_upstream_marked(self, cn):
+    for var in cn.selected_method.inputs:
+      if var.determined_by is not None and var.determined_by.mark == self.mark:
+        return True
+    return False
 
   def exec_pplan_create(self):
     cn_pplan = []
     var_pplan = []
     for cn_or_var in self.exec_roots:
       if isinstance(cn_or_var, Constraint):
-        cn_or_var.add_to_pplan(cn_pplan, set(cn_pplan), self.mark)
+        cn = cn_or_var
+        cn.add_to_pplan(cn_pplan, set(cn_pplan), self.mark)
       elif isinstance(cn_or_var, Variable):
-        if cn_or_var.determined_by is None and not cn_or_var.valid:
-          cn_or_var.add_to_pplan(var_pplan, set(var_pplan), self.mark)
-          cn_or_var.valid = True
+        var = cn_or_var
+        if var.determined_by is None and not var.valid:
+          var.add_to_pplan(var_pplan, set(var_pplan), self.mark)
+          var.valid = True
 
     return cn_pplan + var_pplan
 
