@@ -29,8 +29,8 @@ class Constraint:
       for var in self.selected_method.outputs:
         var.add_to_pplan(pplan, pplan_as_set, done_mark)
 
-      # this is a really slow operation!
-      # thats why we use the set representation of the
+      # 'not in' is a really slow operation for lists!
+      # that's why we use the set representation of the
       # pplan to make this check fast.
       # nevertheless, we cannot use only a set, because
       # the ordering is important!

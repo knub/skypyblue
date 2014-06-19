@@ -13,6 +13,9 @@ class ConstraintSystem:
     self.forced_constraint = None
     self.check_constraints = True
 
+    self.unenforced_constraints = set()
+    self.exec_roots = []
+
   def create_variables(self, names, initialValues):
     assert len(names) == len(initialValues)
     res = []
@@ -75,8 +78,10 @@ class ConstraintSystem:
 
     for variable in constraint.variables:
       variable.add_constraint(constraint)
-    exec_roots = self.update_method_graph(set([constraint]))
-    self.exec_from_roots(exec_roots)
+    self.unenforced_constraints = set([constraint])
+    self.exec_roots = []
+    self.update_method_graph()
+    self.exec_from_roots()
 
     self.constraints.append(constraint)
     self._check_constraints();
@@ -91,41 +96,40 @@ class ConstraintSystem:
       old_outputs = constraint.selected_method.outputs
       constraint.selected_method = None
 
-      exec_roots = []
+      self.exec_roots = []
       for variable in old_outputs:
         variable.determined_by = None
         variable.walk_strength = Strength.WEAKEST
-        exec_roots.append(variable)
+        self.exec_roots.append(variable)
 
       if skip:
         return
 
       self.propagate_walk_strength(old_outputs)
-      unenforcedConstraints = set()
-      self.collect_unenforced(unenforcedConstraints, old_outputs, constraint.strength, True)
-      exec_roots.extend(self.update_method_graph(unenforcedConstraints))
-      self.exec_from_roots(exec_roots)
+      self.unenforced_constraints = set()
+      self.collect_unenforced(old_outputs, constraint.strength, True)
+      self.update_method_graph()
+      self.exec_from_roots()
 
     self._check_constraints()
 
-  def update_method_graph(self, unenforced_constraints):
-    exec_roots = []
-    while unenforced_constraints:
-      cn = self.strongest_constraint(unenforced_constraints)
-      unenforced_constraints.remove(cn)
+  def update_method_graph(self):
+    while self.unenforced_constraints:
+      cn = self.remove_strongest_constraint()
       redetermined_vars = []
       if not Mvine(self.marker).build(cn, redetermined_vars):
-        return exec_roots
+        return
       self.propagate_walk_strength([cn] + redetermined_vars)
-      self.collect_unenforced(unenforced_constraints, redetermined_vars, cn.strength, False)
-      exec_roots.append(cn)
+      self.collect_unenforced(redetermined_vars, cn.strength, False)
+      self.exec_roots.append(cn)
       for var in redetermined_vars:
         if var.determined_by is None:
-          exec_roots.append(var)
-    return exec_roots
+          self.exec_roots.append(var)
 
-  def strongest_constraint(self, constraints):
-    return sorted(constraints, key = lambda cn: cn.strength, reverse = True)[0]
+  def remove_strongest_constraint(self):
+    cn = sorted(self.unenforced_constraints, key = lambda cn: cn.strength, reverse = True)[0]
+    self.unenforced_constraints.remove(cn)
+    return cn
 
   def weakest_constraint(self, constraints):
     return sorted(constraints, key = lambda cn: cn.strength)[0]
@@ -158,29 +162,27 @@ class ConstraintSystem:
             min_strength = max_strength
       out_var.walk_strength = min_strength
 
-  def collect_unenforced(self, unenforced_cns, vars, collection_strength, collect_equal_strength):
+  def collect_unenforced(self, vars, collection_strength, collect_equal_strength):
     self._new_mark()
     for var in vars:
-      unenforced_cns.union(self.collect_unenforced_mark(unenforced_cns, var, collection_strength, collect_equal_strength))
-    return unenforced_cns
+      self.collect_unenforced_mark(var, collection_strength, collect_equal_strength)
 
-  def collect_unenforced_mark(self, unenforced_cns, var, collection_strength, collect_equal_strength):
+  def collect_unenforced_mark(self, var, collection_strength, collect_equal_strength):
     for cn in var.constraints:
       if cn != var.determined_by and cn.mark != self.mark:
         cn.mark = self.mark
         if cn.is_enforced():
           for out_var in cn.selected_method.outputs:
-            self.collect_unenforced_mark(unenforced_cns, out_var, collection_strength, collect_equal_strength)
+            self.collect_unenforced_mark(out_var, collection_strength, collect_equal_strength)
         elif Strength.weaker(cn.strength, collection_strength) or \
               (collect_equal_strength and (cn.strength == collection_strength)):
-          unenforced_cns.add(cn)
-    return unenforced_cns
+          self.unenforced_constraints.add(cn)
 
 
-  def exec_pplan_create(self, exec_roots):
+  def exec_pplan_create(self):
     cn_pplan = []
     var_pplan = []
-    for cn_or_var in exec_roots:
+    for cn_or_var in self.exec_roots:
       if isinstance(cn_or_var, Constraint):
         cn_or_var.add_to_pplan(cn_pplan, set(cn_pplan), self.mark)
       elif isinstance(cn_or_var, Variable):
@@ -190,10 +192,10 @@ class ConstraintSystem:
 
     return cn_pplan + var_pplan
 
-  def exec_from_roots(self, exec_roots):
+  def exec_from_roots(self):
     self._new_mark()
 
-    for cn in reversed(self.exec_pplan_create(exec_roots)):
+    for cn in reversed(self.exec_pplan_create()):
       if cn.mark == self.mark:
         if self.any_immediate_upstream_marked(cn):
           self.exec_from_cycle(cn)
