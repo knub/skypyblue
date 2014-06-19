@@ -15,6 +15,7 @@ class ConstraintSystem:
 
     self.unenforced_constraints = set()
     self.exec_roots = []
+    self.redetermined_vars = []
 
   def create_variables(self, names, initialValues):
     assert len(names) == len(initialValues)
@@ -105,9 +106,9 @@ class ConstraintSystem:
       if skip:
         return
 
-      self.propagate_walk_strength(old_outputs)
+      self.propagate_walk_strength(outputs)
       self.unenforced_constraints = set()
-      self.collect_unenforced(old_outputs, constraint.strength, True)
+      self.collect_unenforced(constraint.strength, True)
       self.update_method_graph()
       self.exec_from_roots()
 
@@ -115,14 +116,14 @@ class ConstraintSystem:
 
   def update_method_graph(self):
     while self.unenforced_constraints:
-      cn = self.remove_strongest_constraint()
-      redetermined_vars = []
-      if not Mvine(self.marker).build(cn, redetermined_vars):
+      constraint = self.remove_strongest_constraint()
+      self.redetermined_vars = []
+      if not Mvine(self.marker).build(constraint, self.redetermined_vars):
         return
-      self.propagate_walk_strength([cn] + redetermined_vars)
-      self.collect_unenforced(redetermined_vars, cn.strength, False)
-      self.exec_roots.append(cn)
-      for var in redetermined_vars:
+      self.propagate_walk_strength([constraint] + self.redetermined_vars)
+      self.collect_unenforced(constraint.strength, False)
+      self.exec_roots.append(constraint)
+      for var in self.redetermined_vars:
         if var.determined_by is None:
           self.exec_roots.append(var)
 
@@ -131,8 +132,9 @@ class ConstraintSystem:
     self.unenforced_constraints.remove(cn)
     return cn
 
-  def weakest_constraint(self, constraints):
-    return sorted(constraints, key = lambda cn: cn.strength)[0]
+  # not used yet
+  # def weakest_constraint(self, constraints):
+  #   return sorted(constraints, key = lambda cn: cn.strength)[0]
 
   def propagate_walk_strength(self, roots):
     self._new_mark()
@@ -162,9 +164,9 @@ class ConstraintSystem:
             min_strength = max_strength
       out_var.walk_strength = min_strength
 
-  def collect_unenforced(self, vars, collection_strength, collect_equal_strength):
+  def collect_unenforced(self, collection_strength, collect_equal_strength):
     self._new_mark()
-    for var in vars:
+    for var in self.redetermined_vars:
       self.collect_unenforced_mark(var, collection_strength, collect_equal_strength)
 
   def collect_unenforced_mark(self, var, collection_strength, collect_equal_strength):
