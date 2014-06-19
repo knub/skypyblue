@@ -15,7 +15,7 @@ p4_var = cs.create_variable("p2", [100, 250])
 def all_points():
   return [p1_var, pm_var, p2_var, p3_var, p4_var]
 
-def main_line(): 
+def main_line():
   return [p1_var, pm_var, p2_var]
 
 def direction_line():
@@ -78,13 +78,13 @@ def handle_mouse_event(event):
       delta = diff2d(mouse_pos, LAST_MOUSE_POS or mouse_pos)
       CURRENT_POINT.set_value([CURRENT_POINT.get_value()[0] + delta[0], CURRENT_POINT.get_value()[1] + delta[1]])
     LAST_MOUSE_POS = mouse_pos
-  elif event.type == pygame.MOUSEBUTTONDOWN: 
+  elif event.type == pygame.MOUSEBUTTONDOWN:
     CURRENT_POINT = get_nearest_pt(mouse_pos)
-  elif event.type == pygame.MOUSEBUTTONUP: 
+  elif event.type == pygame.MOUSEBUTTONUP:
     CURRENT_POINT = None
 
 def diff2d(p1, p2):
-  return p1[0] - p2[0], p1[1] - p2[1]    
+  return p1[0] - p2[0], p1[1] - p2[1]
 
 def get_nearest_pt(mouse_pos):
   diffs = [(length(mouse_pos, pt.get_value()), pt) for pt in all_points()]
@@ -147,12 +147,12 @@ def create_constraints():
     Strength.STRONG,
     [p1_var, p2_var, p3_var, p4_var, pm_var],
     [mpmp3p4, mp1pmp3, mpmp2p4])
-  
+
   cs.add_constraint(constraint)
 
-  # p3_var.stay()
-  # p4_var.stay()
- 
+  p3_var.stay()
+  p4_var.stay()
+
 
 if __name__ == '__main__':
   create_constraints()
