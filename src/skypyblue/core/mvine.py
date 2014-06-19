@@ -5,7 +5,7 @@ class Mvine:
     self.marker = marker
     self.stack = []
     self.root_strength = Strength.WEAKEST
-    self.redetermined_vars = []
+    self.redetermined_vars = set()
 
   @property
   def mark(self):
@@ -37,7 +37,7 @@ class Mvine:
         if var.mark != self.mark:
           var.determined_by = None
           var.walk_strength = Strength.WEAKEST
-          self.redetermined_vars.append(var)
+          self.redetermined_vars.add(var)
       cn.selected_method = None
       return True
     else:
@@ -59,11 +59,11 @@ class Mvine:
               if var.mark != self.mark:
                 var.determined_by = None
                 var.walk_strength = Strength.WEAKEST
-                self.redetermined_vars.append(var)
+                self.redetermined_vars.add(var)
           cn.selected_method = mt
           for var in mt.outputs:
             var.determined_by = cn
-            self.redetermined_vars.append(var)
+            self.redetermined_vars.add(var)
           return True
         else:
           for var in mt.outputs: var.mark = None

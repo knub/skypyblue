@@ -14,8 +14,8 @@ class ConstraintSystem:
     self.check_constraints = True
 
     self.unenforced_constraints = set()
+    self.redetermined_vars = set()
     self.exec_roots = []
-    self.redetermined_vars = []
 
   def create_variables(self, names, initialValues):
     assert len(names) == len(initialValues)
@@ -117,10 +117,10 @@ class ConstraintSystem:
   def update_method_graph(self):
     while self.unenforced_constraints:
       constraint = self.remove_strongest_constraint()
-      self.redetermined_vars = []
+      self.redetermined_vars = set()
       if not Mvine(self.marker).build(constraint, self.redetermined_vars):
         return
-      self.propagate_walk_strength([constraint] + self.redetermined_vars)
+      self.propagate_walk_strength(self.redetermined_vars.union([constraint]))
       self.collect_unenforced(constraint.strength, False)
       self.exec_roots.append(constraint)
       for var in self.redetermined_vars:
@@ -227,8 +227,8 @@ class ConstraintSystem:
 
   def pplan_add(self, objs):
     pplan = []
-    if not isinstance(objs, list):
-      raise Exception("accepting only list of objs!")
+    if not isinstance(objs, set):
+      raise Exception("accepting only set of objs!")
     for el in objs:
       el.add_to_pplan(pplan, set(pplan), self.mark)
     return pplan
