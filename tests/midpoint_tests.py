@@ -3,8 +3,8 @@ from skypyblue.core import ConstraintSystem
 from skypyblue.models import Constraint, Strength, Method
 from point import Point
 
-class MidpointTestClass(unittest.TestCase):
-  __name__ = "MidpointTestClass"
+class MidpointTest(unittest.TestCase):
+  __name__ = "MidpointTest"
   def setUp(self):
     self.constraint_system = ConstraintSystem()
     self.point1 = self.constraint_system.create_variable("Point 1", Point(4, 10))
@@ -23,8 +23,8 @@ class MidpointTestClass(unittest.TestCase):
 
     constraint = Constraint(
         lambda point1, point2, midpoint: midpoint.is_midpoint(point1, point2),
-        Strength.STRONG, 
-        [self.point1, self.point2, self.midpoint], 
+        Strength.STRONG,
+        [self.point1, self.point2, self.midpoint],
         [mMp, mP1, mP2])
 
     self.constraint_system.add_constraint(constraint)

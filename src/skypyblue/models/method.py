@@ -15,6 +15,7 @@ class Method:
     self.in_vars = in_vars if isinstance(in_vars, list) else [in_vars]
     self.out_vars = out_vars if isinstance(out_vars, list) else [out_vars]
     self.method = method
+    self.mark = None
 
   @property
   def outputs(self):
@@ -29,6 +30,12 @@ class Method:
       if not var.valid:
         return True
     return False
+
+  def __str__(self):
+    return "<Method %s => %s>" %(self.in_vars, self.out_vars)
+
+  def __repr__(self):
+    return str(self)
 
   def execute(self):
     out = self.method(*[var.get_value() for var in self.in_vars])

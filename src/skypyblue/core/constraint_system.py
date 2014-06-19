@@ -11,7 +11,7 @@ class ConstraintSystem:
     self.constraints = []
     self.variables = []
     self.forced_constraint = None
-    self.check_constraints = True
+    self.check_constraints = False
 
     self.unenforced_constraints = set()
     self.redetermined_vars = set()
