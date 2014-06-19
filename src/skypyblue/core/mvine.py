@@ -6,6 +6,7 @@ class Mvine:
     self.stack = []
     self.root_strength = Strength.WEAKEST
     self.redetermined_vars = set()
+    self.enforced, self.revoked = [], []
 
   @property
   def mark(self):
@@ -13,123 +14,19 @@ class Mvine:
 
   def build(self, cn, redetermined_vars):
     self.marker.new_mark()
-    self.stack = []
+    self.stack = [cn]
     self.root_strength = cn.strength
     self.redetermined_vars = redetermined_vars
-    return self.enforce_cn_iterative(cn)
-
-  def grow(self):
-    if not self.stack: return True
-    cn = self.stack.pop()
-    if cn.mark == self.mark:
-      ok = self.grow()
-    elif Strength.weaker(cn.strength, self.root_strength):
-      ok = self.revoke_cn(cn)
-    else:
-      ok = self.enforce_cn(cn)
-    if not ok: self.stack.append(cn)
-    return ok
-
-  def revoke_cn(self, cn):
-    cn.mark = self.mark
-    if self.grow():
-      for var in cn.selected_method.outputs:
-        if var.mark != self.mark:
-          var.determined_by = None
-          var.walk_strength = Strength.WEAKEST
-          self.redetermined_vars.add(var)
-      cn.selected_method = None
-      return True
-    else:
-      cn.mark = None
+    if not self.determine_enforced_and_revoked():
       return False
 
-  def enforce_cn(self, cn):
-    cn.mark = self.mark
-    for mt in cn.methods:
-      if self.is_possible_method(mt, cn):
-        next_cns = self.all_constraints_that_determine_a_var_in(mt.outputs)
-        for new_cn in next_cns:
-          self.stack.append(new_cn)
-        for var in mt.outputs:
-          var.mark = self.mark
-        if self.grow():
-          if cn.selected_method is not None:
-            for var in cn.selected_method.outputs:
-              if var.mark != self.mark:
-                var.determined_by = None
-                var.walk_strength = Strength.WEAKEST
-                self.redetermined_vars.add(var)
-          cn.selected_method = mt
-          for var in mt.outputs:
-            var.determined_by = cn
-            self.redetermined_vars.add(var)
-          return True
-        else:
-          for var in mt.outputs: var.mark = None
-          for new_cn in next_cns: self.stack.pop()
-    cn.mark = None
-    return False
-
-
-  def enforce_cn_iterative(self, constraint):
-    stack = [constraint]
-    enforced = {}
-    revoked = {}
-    enforced_step, revoked_step = 0, 0
-    while True:
-      if not stack: break
-      cn = stack.pop()
-      if cn.mark == self.mark: continue
-      cn.mark = self.mark
-
-      if Strength.weaker(cn.strength, self.root_strength):
-        # revoke part
-        revoked_step += 1
-        revoked[revoked_step] = cn
-      else:
-        # enforce part
-        mt = self.next_possible_method(cn)
-        if mt is None:
-          # no method found, backtrack
-          if not enforced or not revoked:
-            # no backtrack possible, so we cannot enforce the start constraint
-            return False
-          revoked.pop(revoked_step)
-          revoked_step -= 1
-          cn, mt = enforced.pop(enforced_step)
-          enforced_step -= 1
-          # unmark the outputs
-          for var in mt.outputs: var.mark = None
-          cn.mark = None
-          # append last enforced cn back to the stack
-          stack.append(cn)
-        else:
-          enforced_step += 1
-          enforced[enforced_step] = (cn, mt)
-          # mark outputs
-          # add cns, which are not marked and determine outputs of the current method
-          for var in mt.outputs:
-            var.mark = self.mark
-            if var.determined_by is not None and var.determined_by.mark != self.mark:
-              # possible dublicates?
-              stack.append(var.determined_by)
-
-
-    def reset_outputs(mt):
-      for var in mt.outputs:
-        if var.mark != self.mark:
-          var.determined_by = None
-          var.walk_strength = Strength.WEAKEST
-          self.redetermined_vars.add(var)
-
-    for cn in revoked.values():
-      reset_outputs(cn.selected_method)
+    for cn in self.revoked:
+      self.reset_outputs(cn.selected_method)
       cn.selected_method = None
 
-    for cn, mt in enforced.values():
+    for cn, mt in self.enforced:
       if cn.selected_method is not None:
-        reset_outputs(cn.selected_method)
+        self.reset_outputs(cn.selected_method)
       cn.selected_method = mt
       mt.mark = None
       for var in mt.outputs:
@@ -138,15 +35,62 @@ class Mvine:
 
     return True
 
+  def add_conflicting_cns_to_stack(self, mt):
+    # mark outputs
+    # add cns, which are not marked and determine outputs of the current method
+    for var in mt.outputs:
+      var.mark = self.mark
+      if var.determined_by is not None and var.determined_by.mark != self.mark:
+        # possible dublicates?
+        self.stack.append(var.determined_by)
+
+  def backtrack(self):
+    self.revoked.pop()
+    cn, mt = self.enforced.pop()
+    # unmark the outputs
+    for var in mt.outputs: var.mark = None
+    cn.mark = None
+    # append last enforced cn back to the stack
+    self.stack.append(cn)
+
+  def determine_enforced_and_revoked(self):
+    self.enforced, self.revoked = [], []
+    while True:
+      if not self.stack: break
+      cn = self.stack.pop()
+      if cn.mark == self.mark: continue
+      cn.mark = self.mark
+
+      if Strength.weaker(cn.strength, self.root_strength):
+        self.revoked.append(cn)
+      else:
+        mt = self.next_possible_method(cn)
+        if mt is None:
+          # no method found, backtrack
+          if not self.enforced or not self.revoked:
+            # no backtrack possible, so we cannot enforce
+            # the start constraint
+            return False
+          self.backtrack()
+        else:
+          self.enforced.append((cn, mt))
+          self.add_conflicting_cns_to_stack(mt)
+    return True
+
+
+  def reset_outputs(self, mt):
+    for var in mt.outputs:
+      if var.mark != self.mark:
+        var.determined_by = None
+        var.walk_strength = Strength.WEAKEST
+        self.redetermined_vars.add(var)
+
   def next_possible_method(self, cn):
     for mt in cn.methods:
       if mt.mark != self.mark and self.is_possible_method(mt, cn):
         mt.mark = self.mark
         return mt
     return None
-
-  def all_constraints_that_determine_a_var_in(self, variables):
-    return set([var.determined_by for var in variables if var.determined_by is not None])
 
   def is_possible_method(self, mt, cn):
     for var in mt.outputs:
