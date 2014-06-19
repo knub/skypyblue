@@ -117,7 +117,7 @@ class ConstraintSystem:
   def update_method_graph(self):
     while self.unenforced_constraints:
       constraint = self.remove_strongest_constraint()
-      self.redetermined_vars = set()
+      self.redetermined_vars.clear()
       if not Mvine(self.marker).build(constraint, self.redetermined_vars):
         return
       self.propagate_walk_strength(self.redetermined_vars.union([constraint]))
