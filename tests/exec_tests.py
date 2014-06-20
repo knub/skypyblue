@@ -14,7 +14,7 @@ class PplanTests(TestCase):
 
     self.assertTrue(cn, v.determined_by)
     self.assertEqual(
-      cn.add_to_pplan([], set(), self.cs.marker.new_mark()),
+      cn.add_to_pplan([], self.cs.marker.new_mark()),
       [cn],
       "should contain only the constraint")
 
@@ -30,20 +30,20 @@ class PplanTests(TestCase):
     self.assertTrue(cn2, v.determined_by)
 
     self.assertEqual(
-      cn2.add_to_pplan([], set(), self.cs.marker.new_mark()),
+      cn2.add_to_pplan([], self.cs.marker.new_mark()),
       [cn2],
       "does not add other constraint of \
       a variable if it is not enforced")
 
     self.assertEqual(
-      cn1.add_to_pplan([], set(), self.cs.marker.new_mark()),
+      cn1.add_to_pplan([], self.cs.marker.new_mark()),
       [],
       "does not add unenforced constraints")
 
   def test_pplan_add_for_variable(self):
     v = self.cs.create_variable("v", 1)
     self.assertEqual(
-      v.add_to_pplan([], set(), self.cs.marker.new_mark()),
+      v.add_to_pplan([], self.cs.marker.new_mark()),
       [],
       "plain variable return pplan as it was")
 

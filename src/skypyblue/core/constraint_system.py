@@ -154,7 +154,7 @@ class ConstraintSystem:
       min_strength = cn.strength
       for mt in cn.methods:
         if out_var not in mt.outputs:
-          max_strength = self.max_out(mt, cn.selected_method.outputs)
+          max_strength = max([var.walk_strength for var in mt.outputs if var not in cn.selected_method.outputs])
           if Strength.weaker(max_strength, min_strength):
             min_strength = max_strength
       out_var.walk_strength = min_strength
@@ -187,11 +187,11 @@ class ConstraintSystem:
     for cn_or_var in self.exec_roots:
       if isinstance(cn_or_var, Constraint):
         cn = cn_or_var
-        cn.add_to_pplan(cn_pplan, set(cn_pplan), self.mark)
+        cn.add_to_pplan(cn_pplan, self.mark)
       elif isinstance(cn_or_var, Variable):
         var = cn_or_var
         if var.determined_by is None and not var.valid:
-          var.add_to_pplan(var_pplan, set(var_pplan), self.mark)
+          var.add_to_pplan(var_pplan, self.mark)
           var.valid = True
 
     return cn_pplan + var_pplan
@@ -232,12 +232,13 @@ class ConstraintSystem:
     if not isinstance(objs, set):
       raise Exception("accepting only set of objs!")
     for el in objs:
-      el.add_to_pplan(pplan, set(pplan), self.mark)
+      el.add_to_pplan(pplan, self.mark)
     return pplan
 
   def _new_mark(self):
     self.marker.new_mark()
     self.mark = self.marker.mark
+
 
   # def extract_plan(self, root_cns):
   #   good_cns = []
@@ -285,15 +286,6 @@ class ConstraintSystem:
   #       self.execute_propagate_valid(cn)
   #   else:
   #     raise ValueError("trying to execute invalid plan")
-
-
-  def max_out(self, mt, current_outputs):
-    max_strength = Strength.WEAKEST
-    for var in mt.outputs:
-      if not var in current_outputs and \
-        Strength.weaker(max_strength, var.walk_strength):
-        max_strength = var.walk_strength
-    return max_strength
 
 
 

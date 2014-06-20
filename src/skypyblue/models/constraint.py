@@ -23,21 +23,14 @@ class Constraint:
     self.selected_method = None
     self.mark = None
 
-  # 'not in' is a really slow operation for lists!
-  # that's why we use the set representation of the
-  # pplan to make this check fast.
-  # nevertheless, we cannot use only a set, because
-  # the ordering is important!
-  def add_to_pplan(self, pplan, pplan_as_set, done_mark):
+  def add_to_pplan(self, pplan, done_mark):
     stack = [self]
     while stack:
       cur_cn = stack.pop()
-      if not cur_cn.is_enforced() or cur_cn.mark == done_mark:
+      if cur_cn.selected_method is None or cur_cn.mark == done_mark:
         continue
       cur_cn.mark = done_mark
-      if cur_cn not in pplan_as_set:
-        pplan.insert(0, cur_cn)
-        pplan_as_set.add(cur_cn)
+      pplan.insert(0, cur_cn)
       for var in cur_cn.selected_method.outputs:
         for var_cn in var.constraints:
           if var_cn != var.determined_by:
@@ -47,7 +40,7 @@ class Constraint:
 
   def is_enforced(self):
     "returns True is there is is a method selected, otherwise False"
-    return not self.selected_method is None
+    return self.selected_method is not None
 
   def __str__(self):
     return "<Constraint %s>" % (

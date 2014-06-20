@@ -12,10 +12,10 @@ class Variable:
     self.system = system
     self.stay_constraint = None
 
-  def add_to_pplan(self, pplan, pplan_as_set, done_mark):
+  def add_to_pplan(self, pplan, done_mark):
     for cn in self.constraints:
       if cn != self.determined_by:
-        cn.add_to_pplan(pplan, pplan_as_set, done_mark)
+        cn.add_to_pplan(pplan, done_mark)
     return pplan
 
   def get_value(self):
