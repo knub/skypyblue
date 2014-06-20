@@ -161,18 +161,18 @@ class ConstraintSystem:
   def collect_unenforced(self, collection_strength, collect_equal_strength):
     self._new_mark()
     for var in self.redetermined_vars:
-      self.collect_unenforced_mark(var, collection_strength, collect_equal_strength)
-
-  def collect_unenforced_mark(self, var, collection_strength, collect_equal_strength):
-    for cn in var.constraints:
-      if cn != var.determined_by and cn.mark != self.mark:
-        cn.mark = self.mark
-        if cn.is_enforced():
-          for out_var in cn.selected_method.outputs:
-            self.collect_unenforced_mark(out_var, collection_strength, collect_equal_strength)
-        elif Strength.weaker(cn.strength, collection_strength) or \
-              (collect_equal_strength and (cn.strength == collection_strength)):
-          self.unenforced_constraints.add(cn)
+      stack = [var]
+      while stack:
+        cur_var = stack.pop()
+        for cn in cur_var.constraints:
+          if cn != cur_var.determined_by and cn.mark != self.mark:
+            cn.mark = self.mark
+            if cn.is_enforced():
+              for out_var in cn.selected_method.outputs:
+                stack.append(out_var)
+            elif Strength.weaker(cn.strength, collection_strength) or \
+                  (collect_equal_strength and (cn.strength == collection_strength)):
+              self.unenforced_constraints.add(cn)
 
   def any_immediate_upstream_marked(self, cn):
     for var in cn.selected_method.inputs:
