@@ -93,7 +93,6 @@ class ConstraintSystem:
       variable.remove_constraint(constraint)
 
     self.constraints.remove(constraint)
-
     if constraint.is_enforced():
       old_outputs = constraint.selected_method.outputs
       constraint.selected_method = None
@@ -141,8 +140,6 @@ class ConstraintSystem:
     self._new_mark()
 
     for cn in self.pplan_add(roots):
-      # there is done the same check as here. TODO: delete the uncommented
-      # if self.any_immediate_upstream_marked(cn):
       for var in cn.selected_method.inputs:
         if var.determined_by is not None and var.determined_by.mark == self.mark:
           var.walk_strength = Strength.WEAKEST
