@@ -1,10 +1,6 @@
 from unittest import TestCase
 from skypyblue.core import ConstraintSystem
 from skypyblue.models import Method, Constraint, Strength
-try:
-  from unittest.mock import MagicMock as Mock
-except ImportError as e:
-  from mock import Mock
 
 class ConstraintTests(TestCase):
 
@@ -24,7 +20,6 @@ class ConstraintTests(TestCase):
 
 
   def test_adding_enforced_to_pplan(self):
-    self.cn.is_enforced = Mock(return_value = True)
     self.assertIsNone(self.cn.mark)
 
     mark = self.cs.marker.new_mark()
@@ -34,7 +29,7 @@ class ConstraintTests(TestCase):
     self.assertEqual(mark, self.cn.mark)
 
   def test_adding_unenforced_to_pplan(self):
-    self.cn.is_enforced = Mock(return_value = False)
+    self.cn.selected_method = None
     self.assertIsNone(self.cn.mark)
 
     pplan = self.cn.add_to_pplan([], set(), self.cs.marker.new_mark())
@@ -43,7 +38,6 @@ class ConstraintTests(TestCase):
     self.assertIsNone(self.cn.mark)
 
   def test_adding_with_the_same_mark(self):
-    self.cn.is_enforced = Mock(return_value = True)
 
     mark = self.cs.marker.new_mark()
     self.cn.mark = mark
@@ -53,7 +47,6 @@ class ConstraintTests(TestCase):
     self.assertEqual(mark, self.cn.mark)
 
   def test_adding_with_other_mark(self):
-    self.cn.is_enforced = Mock(return_value = True)
 
     mark1 = self.cs.marker.new_mark()
     mark2 = self.cs.marker.new_mark()
