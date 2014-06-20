@@ -150,14 +150,16 @@ class ConstraintSystem:
       cn.mark = None
 
   def compute_walkabout_strengths(self, cn):
-    for out_var in cn.selected_method.outputs:
-      min_strength = cn.strength
-      for mt in cn.methods:
-        if out_var not in mt.outputs:
-          max_strength = max([var.walk_strength for var in mt.outputs if var not in cn.selected_method.outputs])
-          if Strength.weaker(max_strength, min_strength):
-            min_strength = max_strength
-      out_var.walk_strength = min_strength
+    outs = cn.selected_method.outputs
+    for out_var in outs:
+      max_strengths = [self.max_out(mt, outs) for mt in cn.methods if out_var not in mt.outputs]
+      max_strengths.append(cn.strength)
+      out_var.walk_strength = min(max_strengths)
+
+
+
+  def max_out(self, mt, current_outputs):
+    return max([var.walk_strength for var in mt.outputs if var not in current_outputs])
 
   def collect_unenforced(self, collection_strength, collect_equal_strength):
     self._new_mark()
