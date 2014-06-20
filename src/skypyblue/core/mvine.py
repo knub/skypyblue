@@ -3,17 +3,15 @@ from skypyblue.models import Strength
 class Mvine:
   def __init__(self, marker):
     self.marker = marker
+    self.mark = marker.mark
     self.stack = []
     self.root_strength = Strength.WEAKEST
     self.redetermined_vars = set()
     self.enforced, self.revoked = [], []
 
-  @property
-  def mark(self):
-    return self.marker.mark
-
   def build(self, cn, redetermined_vars):
     self.marker.new_mark()
+    self.mark = self.marker.mark
     self.stack = [cn]
     self.root_strength = cn.strength
     self.redetermined_vars = redetermined_vars

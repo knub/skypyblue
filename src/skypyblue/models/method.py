@@ -12,18 +12,10 @@ class Method:
       method2 = Method([v1, v2], [v3, v4],
         lambda v1, v2: v1+v2, v1-v2)
     """
-    self.in_vars = in_vars if isinstance(in_vars, list) else [in_vars]
-    self.out_vars = out_vars if isinstance(out_vars, list) else [out_vars]
+    self.inputs = in_vars if isinstance(in_vars, list) else [in_vars]
+    self.outputs = out_vars if isinstance(out_vars, list) else [out_vars]
     self.method = method
     self.mark = None
-
-  @property
-  def outputs(self):
-    return self.out_vars
-
-  @property
-  def inputs(self):
-    return self.in_vars
 
   def has_invalid_vars(self):
     for var in self.inputs:
@@ -32,15 +24,15 @@ class Method:
     return False
 
   def __str__(self):
-    return "<Method %s => %s>" %(self.in_vars, self.out_vars)
+    return "<Method %s => %s>" %(self.inputs, self.outputs)
 
   def __repr__(self):
     return str(self)
 
   def execute(self):
-    out = self.method(*[var.get_value() for var in self.in_vars])
-    if len(self.out_vars) == 1:
-      self.out_vars[0].set_value(out, triggerChange = False);
+    out = self.method(*[var.get_value() for var in self.inputs])
+    if len(self.outputs) == 1:
+      self.outputs[0].set_value(out, triggerChange = False);
     else:
-      for i in range(len(self.out_vars)):
-        self.out_vars[i].set_value(out[i], triggerChange = False)
+      for i in range(len(self.outputs)):
+        self.outputs[i].set_value(out[i], triggerChange = False)

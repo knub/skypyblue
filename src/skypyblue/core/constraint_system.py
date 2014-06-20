@@ -16,6 +16,7 @@ class ConstraintSystem:
     self.unenforced_constraints = set()
     self.redetermined_vars = set()
     self.exec_roots = []
+    self.mark = None
 
   def create_variables(self, names, initialValues):
     assert len(names) == len(initialValues)
@@ -165,14 +166,14 @@ class ConstraintSystem:
       while stack:
         cur_var = stack.pop()
         for cn in cur_var.constraints:
-          if cn != cur_var.determined_by and cn.mark != self.mark:
-            cn.mark = self.mark
-            if cn.is_enforced():
-              for out_var in cn.selected_method.outputs:
-                stack.append(out_var)
-            elif Strength.weaker(cn.strength, collection_strength) or \
-                  (collect_equal_strength and (cn.strength == collection_strength)):
-              self.unenforced_constraints.add(cn)
+          if cn == cur_var.determined_by or cn.mark == self.mark:
+            continue
+          cn.mark = self.mark
+          if cn.is_enforced():
+            stack.extend(cn.selected_method.outputs)
+          elif Strength.weaker(cn.strength, collection_strength) or \
+                (collect_equal_strength and (cn.strength == collection_strength)):
+            self.unenforced_constraints.add(cn)
 
   def any_immediate_upstream_marked(self, cn):
     for var in cn.selected_method.inputs:
@@ -236,10 +237,7 @@ class ConstraintSystem:
 
   def _new_mark(self):
     self.marker.new_mark()
-
-  @property
-  def mark(self):
-    return self.marker.mark
+    self.mark = self.marker.mark
 
   # def extract_plan(self, root_cns):
   #   good_cns = []
