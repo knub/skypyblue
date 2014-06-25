@@ -1,7 +1,7 @@
 import inspect
 
 class Constraint:
-  def __init__(self, check_function, strength, variables, methods):
+  def __init__(self, check_function, strength, variables, methods, name = ""):
     """
     check_function: is lambda returning bool. defines a contraint and can be used to check, whether the contraint is fullfilled
     strength:       is of type skypyblue.models.strength.Strength and indicates how important it is to fullfill the contraint
@@ -22,6 +22,7 @@ class Constraint:
 
     self.selected_method = None
     self.mark = None
+    self.name = name
 
   def add_to_pplan(self, pplan, done_mark):
     stack = [self]
@@ -43,8 +44,12 @@ class Constraint:
     return self.selected_method is not None
 
   def __str__(self):
-    return "<Constraint %s>" % (
-      inspect.getsource(self.check_function).strip().strip(","))
+    if self.name:
+      return "<Constraint '%s' %s>" % (self.name,
+        inspect.getsource(self.check_function).strip().strip(","))
+    else:
+      return "<Constraint %s>" % (
+        inspect.getsource(self.check_function).strip().strip(","))
 
   def __repr__(self):
     return str(self)

@@ -1,7 +1,17 @@
 from skypyblue.models import Variable, Method, Constraint, Strength, InternalStrength
-from skypyblue.core import Mvine, Marker
+from skypyblue.core import Mvine, Marker, CycleException
 
 import pdb;
+
+
+def fail_on_cylce(func):
+  def wrapper(self, *args, **kwargs):
+    self._cycle = None
+    res = func(self, *args, **kwargs)
+    if self._cycle is not None:
+      raise CycleException(self._cycle, "Cycle was detected")
+    return res
+  return wrapper
 
 # https://www.cs.washington.edu/research/constraints/solvers/skyblue-cycles.html
 class ConstraintSystem:
@@ -17,6 +27,8 @@ class ConstraintSystem:
     self.redetermined_vars = set()
     self.exec_roots = []
     self.mark = None
+
+    self._cycle = None
 
   def create_variables(self, names, initialValues):
     assert len(names) == len(initialValues)
@@ -74,6 +86,7 @@ class ConstraintSystem:
     self.add_constraint(stay_constraint)
     return stay_constraint
 
+  @fail_on_cylce
   def add_constraint(self, constraint):
     constraint.selected_method = None
     constraint.mark = None
@@ -88,10 +101,10 @@ class ConstraintSystem:
     self.constraints.append(constraint)
     self._check_constraints();
 
+  @fail_on_cylce
   def remove_constraint(self, constraint, skip = False):
     for variable in constraint.variables:
       variable.remove_constraint(constraint)
-
     self.constraints.remove(constraint)
     if constraint.is_enforced():
       old_outputs = constraint.selected_method.outputs
@@ -216,6 +229,8 @@ class ConstraintSystem:
       var.valid = inputs_valid
 
   def exec_from_cycle(self, cn):
+    if self._cycle is None: self._cycle = set()
+    self._cycle.add(cn)
     if cn.mark == self.mark:
       cn.mark = None
       for var in cn.selected_method.outputs:

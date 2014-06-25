@@ -1,7 +1,7 @@
 from skypyblue.models import Method, Constraint
 
 class ConstraintFactory:
-  def equality_constraint(self, variable1, variable2, strength):
+  def equality_constraint(self, variable1, variable2, strength, name = ""):
     m1 = Method([variable1], [variable2],
       lambda v1: v1)
 
@@ -12,11 +12,11 @@ class ConstraintFactory:
       lambda v1, v2: v1 == v2,
       strength,
       [variable1, variable2],
-      [m1, m2])
+      [m1, m2], name)
 
     return constraint
 
-  def scale_constraint(self, destination, source, scale, offset, strength):
+  def scale_constraint(self, destination, source, scale, offset, strength, name = ""):
     m1 = Method([source, scale, offset], [destination],
       lambda source, scale, offset: scale * source + offset)
 
@@ -27,7 +27,7 @@ class ConstraintFactory:
       lambda destination, source, scale, offset: destination == scale * source + offset,
       strength,
       [destination, source, scale, offset],
-      [m1, m2])
+      [m1, m2], name)
 
     return constraint
 
