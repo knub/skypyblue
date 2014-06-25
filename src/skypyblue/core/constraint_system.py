@@ -1,7 +1,7 @@
 from skypyblue.models import Variable, Method, Constraint, Strength, InternalStrength
-from skypyblue.core import Mvine, Marker, CycleException
+from skypyblue.core import Mvine, Marker, CycleException, logger
 
-import pdb;
+import pdb
 
 
 def fail_on_cylce(func):
@@ -54,11 +54,12 @@ class ConstraintSystem:
       lambda x: True,
       InternalStrength.FORCED,
       variables,
-      [m])
+      [m], "set")
 
     if self.forced_constraint is not None:
+      # logger.DEBUG("removed %s" %(self.forced_constraint))
       self.remove_constraint(self.forced_constraint, skip = True)
-
+    # logger.DEBUG(", ".join([str(var.determined_by) for var in self.variables]))
     self.forced_constraint = cn
     self.add_constraint(cn)
 
@@ -81,7 +82,7 @@ class ConstraintSystem:
       lambda x: True,
       strength,
       [variable],
-      [m])
+      [m], "stay")
 
     self.add_constraint(stay_constraint)
     return stay_constraint
@@ -95,19 +96,21 @@ class ConstraintSystem:
       variable.add_constraint(constraint)
     self.unenforced_constraints = set([constraint])
     self.exec_roots = []
+
     self.update_method_graph()
     self.exec_from_roots()
 
     self.constraints.append(constraint)
-    self._check_constraints();
+    self._check_constraints()
 
   @fail_on_cylce
   def remove_constraint(self, constraint, skip = False):
     for variable in constraint.variables:
       variable.remove_constraint(constraint)
+
     self.constraints.remove(constraint)
     if constraint.is_enforced():
-      old_outputs = constraint.selected_method.outputs
+      old_outputs = set(constraint.selected_method.outputs)
       constraint.selected_method = None
 
       self.exec_roots = []
@@ -119,7 +122,7 @@ class ConstraintSystem:
       if skip:
         return
 
-      self.propagate_walk_strength(outputs)
+      self.propagate_walk_strength(old_outputs)
       self.unenforced_constraints = set()
       self.collect_unenforced(constraint.strength, True)
       self.update_method_graph()
@@ -132,13 +135,15 @@ class ConstraintSystem:
       constraint = self.remove_strongest_constraint()
       self.redetermined_vars.clear()
       if not Mvine(self.marker).build(constraint, self.redetermined_vars):
-        return
+        continue
       self.propagate_walk_strength(self.redetermined_vars.union([constraint]))
       self.collect_unenforced(constraint.strength, False)
       self.exec_roots.append(constraint)
       for var in self.redetermined_vars:
         if var.determined_by is None:
           self.exec_roots.append(var)
+
+    # logger.DEBUG("exec_roots: %s" %self.exec_roots)
 
   def remove_strongest_constraint(self):
     cn = sorted(self.unenforced_constraints, key = lambda cn: cn.strength, reverse = True)[0]
@@ -193,6 +198,9 @@ class ConstraintSystem:
         return True
     return False
 
+  def immediate_marked_upstream(self, cn):
+    return [var.determined_by for var in cn.selected_method.inputs if var.determined_by is not None and var.determined_by.mark == self.mark]
+
   def exec_pplan_create(self):
     cn_pplan = []
     var_pplan = []
@@ -205,8 +213,10 @@ class ConstraintSystem:
         if var.determined_by is None and not var.valid:
           var.add_to_pplan(var_pplan, self.mark)
           var.valid = True
-
-    return cn_pplan + var_pplan
+    pplan = cn_pplan + var_pplan
+    # logger.DEBUG("pplan:\t%s" %", ".join([str(cn) for cn in reversed(pplan)]))
+    # logger.DEBUG("marks:\t%s" %", ".join([str(cn.mark) for cn in reversed(pplan)]))
+    return pplan
 
   def exec_from_roots(self):
     self._new_mark()
@@ -231,6 +241,8 @@ class ConstraintSystem:
   def exec_from_cycle(self, cn):
     if self._cycle is None: self._cycle = set()
     self._cycle.add(cn)
+    # logger.DEBUG("%s -> %s" %(cn, self.immediate_marked_upstream(cn)))
+    # logger.DEBUG(", ".join([str([var.determined_by, var.determined_by.mark]) for var in self.variables if var.determined_by]))
     if cn.mark == self.mark:
       cn.mark = None
       for var in cn.selected_method.outputs:
@@ -244,10 +256,11 @@ class ConstraintSystem:
   def pplan_add(self, objs):
     pplan = []
     if not isinstance(objs, set):
-      raise Exception("accepting only set of objs!")
+      raise Exception("accepting only set of objs! Got %s of type %s" %(objs, type(objs)))
     for el in objs:
       el.add_to_pplan(pplan, self.mark)
     return pplan
+
 
   def _new_mark(self):
     self.marker.new_mark()
