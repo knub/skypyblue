@@ -19,3 +19,15 @@ cs.add_constraint(constraint)
 v1.get_value() # => 1
 v2.get_value() # => 1
 
+=================
+
+cs = ConstraintSystem()
+
+v1 = Variable("v1", 1, cs)
+v2 = Variable("v2", 2, cs)
+constraint = ConstraintFactory.equality_constraint(v1, v2, Strength.STRONG)
+
+cs.add_constraint(constraint)
+
+v1.get_value() # => 1
+v2.get_value() # => 1
