@@ -1,4 +1,4 @@
-from skypyblue.models import Variable, Method, Constraint, Strength, InternalStrength
+from skypyblue.models import *
 from skypyblue.core import Mvine, Marker
 import pdb;
 class ConstraintSystem:
@@ -230,27 +230,27 @@ class ConstraintSystem:
   # create-valid-plan in now Plan(....)
   # invalidate-constraint-plans is now constraint.invalidate_plans()
   # invalidate_plans_on_setting_method moved to constraint
-  def extract_plan(self, root_cns):
-    good_cns = []
-    bad_cns = []
+  def extract_plan(self, root_constraints):
+    good_constraints = []
+    bad_constraints = []
     self._new_mark()
-    pplan = self.pplan_add([], root_cns)
+    pplan = self.pplan_add(root_constraints)
 
     while pplan:
       cn = pplan.pop()
       if cn.mark != self.mark:
         pass
       elif self.any_immediate_upstream_marked(cn):
-        bad_cns.append(cn)
+        bad_constraints.append(cn)
       else:
         cn.mark = None
-        good_cns.append(cn)
-    return self.Plan(root_cns, good_cns, bad_cns, True)
+        good_constraints.append(cn)
+    return Plan(root_constraints, good_constraints, bad_constraints, True)
 
 
   def execute_plan(self, plan):
     if plan.valid:
-      for cn in plan.good_cns:
+      for cn in plan.good_constraints:
         self.execute_propagate_valid(cn)
     else:
       raise ValueError("trying to execute invalid plan")
