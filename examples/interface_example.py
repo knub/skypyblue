@@ -4,7 +4,6 @@ cs = ConstraintSystem()
 # p = Point(10,15)
 # v1 = cs.create_variable("v1", p, mutable = True)
 
-# variables need a name?
 v1 = cs.create_variable("v1", 15)
 v2 = cs.create_variable("v2", 15)
 v3 = cs.create_variable("v3", 15)
