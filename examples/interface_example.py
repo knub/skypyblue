@@ -2,12 +2,11 @@
 cs = ConstraintSystem()
 
 # p = Point(10,15)
-# v1 = cs.create_variable("v1", p, mutable = True)
 
-v1 = cs.create_variable("v1", 15)
-v2 = cs.create_variable("v2", 15)
-v3 = cs.create_variable("v3", 15)
-v4 = cs.create_variable("v4", 10)
+v1 = Variable("v1", 15, cs)
+v2 = Variable("v2", 15, cs)
+v3 = Variable("v3", 15, cs)
+v4 = Variable("v4", 10, cs)
 
 cs.stay(v4, Strength.WEAK)
 

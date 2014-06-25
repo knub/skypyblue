@@ -4,9 +4,9 @@ from skypyblue.models import Constraint, Method, Strength, Variable, Strength
 class Fixture:
   def __init__(self):
     self.constraint_system = ConstraintSystem()
-    self.a = self.constraint_system.create_variable("a", 1)
-    self.b = self.constraint_system.create_variable("b", 2)
-    self.c = self.constraint_system.create_variable("c", 3)
+    self.a = Variable("a", 1, self.constraint_system)
+    self.b = Variable("b", 2, self.constraint_system)
+    self.c = Variable("c", 3, self.constraint_system)
 
     self.a_equals_b_plus_2_constraint = self.create_a_equals_b_plus_2_constraint()
     self.a_equals_c_minus_1_constraint = self.create_a_equals_c_minus_1_constraint()

@@ -11,6 +11,7 @@ class Variable:
     self.valid = True
     self.system = system
     self.stay_constraint = None
+    system.variables.append(self)
 
   def add_to_pplan(self, pplan, done_mark):
     for cn in self.constraints:

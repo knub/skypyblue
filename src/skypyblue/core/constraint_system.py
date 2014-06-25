@@ -34,14 +34,8 @@ class ConstraintSystem:
     assert len(names) == len(initialValues)
     res = []
     for i in range(len(names)):
-      res.append(self.create_variable(names[i], initialValues[i]))
+      res.append(Variable(names[i], initialValues[i], self))
     return res
-
-  # TODO: Remove these
-  def create_variable(self, name, initialValue):
-    variable = Variable(name, initialValue, self)
-    self.variables.append(variable)
-    return variable
 
   def change_variable_values(self, variables, values):
     if len(variables) == 1:

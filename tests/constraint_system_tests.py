@@ -1,6 +1,6 @@
 import unittest
 from skypyblue.core import ConstraintSystem
-from skypyblue.models import Constraint, Strength
+from skypyblue.models import Constraint, Strength, Variable
 
 class ConstraintSystemTest(unittest.TestCase):
   """
@@ -8,7 +8,7 @@ class ConstraintSystemTest(unittest.TestCase):
   """
   def setUp(self):
     self.cs = ConstraintSystem()
-    self.v1 = self.cs.create_variable("v1", 15)
+    self.v1 = Variable("v1", 15, self.cs)
     self.c1 = Constraint(lambda x: True, Strength.REQUIRED, [self.v1], [])
 
   def test_create_variable(self):

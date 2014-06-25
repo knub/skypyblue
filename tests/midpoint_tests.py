@@ -1,15 +1,15 @@
 import unittest
 from skypyblue.core import ConstraintSystem
-from skypyblue.models import Constraint, Strength, Method
+from skypyblue.models import Constraint, Strength, Method, Variable
 from point import Point
 
 class MidpointTest(unittest.TestCase):
   __name__ = "MidpointTest"
   def setUp(self):
     self.constraint_system = ConstraintSystem()
-    self.point1 = self.constraint_system.create_variable("Point 1", Point(4, 10))
-    self.point2 = self.constraint_system.create_variable("Point 2", Point(10, 30))
-    self.midpoint = self.constraint_system.create_variable("midpoint", Point(0, 0))
+    self.point1 = Variable("Point 1", Point(4, 10), self.constraint_system)
+    self.point2 = Variable("Point 2", Point(10, 30), self.constraint_system)
+    self.midpoint = Variable("midpoint", Point(0, 0), self.constraint_system)
 
     mMp = Method([self.point1, self.point2], [self.midpoint],
       lambda p1, p2: Point((p1.X + p2.X) / 2 , (p1.Y + p2.Y) / 2))
