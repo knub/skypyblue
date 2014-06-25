@@ -17,7 +17,6 @@ class ConstraintFactory:
 
     return constraint
 
-  def scale_constraint(self, destination, source, scale, offset, strength, name = ""):
   @staticmethod
   def scale_constraint(destination, source, scale, offset, strength, name = ""):
     m1 = Method([source, scale, offset], [destination],
