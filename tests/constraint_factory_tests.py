@@ -7,14 +7,13 @@ class ConstraintFactoryTestClass(unittest.TestCase):
   __name__ = "ConstraintFactoryTestClass"
 
   def setUp(self):
-    self.constraint_factory = ConstraintFactory()
     self.constraint_system = ConstraintSystem()
 
   def test_equality_constraint(self):
     variable1 = Variable("variable1", 10, self.constraint_system)
     variable2 = Variable("variable2", 20, self.constraint_system)
 
-    constraint = self.constraint_factory.equality_constraint(
+    constraint = ConstraintFactory.equality_constraint(
         variable1,
         variable2,
         Strength.STRONG
@@ -30,7 +29,7 @@ class ConstraintFactoryTestClass(unittest.TestCase):
     scale = Variable("scale", 3, self.constraint_system)
     offset = Variable("offset", 4, self.constraint_system)
 
-    constraint = self.constraint_factory.scale_constraint(
+    constraint = ConstraintFactory.scale_constraint(
         destination,
         source,
         scale,

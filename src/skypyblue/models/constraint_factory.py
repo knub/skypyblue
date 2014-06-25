@@ -1,7 +1,8 @@
 from skypyblue.models import Method, Constraint
 
 class ConstraintFactory:
-  def equality_constraint(self, variable1, variable2, strength, name = ""):
+  @staticmethod
+  def equality_constraint(variable1, variable2, strength, name = ""):
     m1 = Method([variable1], [variable2],
       lambda v1: v1)
 
@@ -17,6 +18,8 @@ class ConstraintFactory:
     return constraint
 
   def scale_constraint(self, destination, source, scale, offset, strength, name = ""):
+  @staticmethod
+  def scale_constraint(destination, source, scale, offset, strength, name = ""):
     m1 = Method([source, scale, offset], [destination],
       lambda source, scale, offset: scale * source + offset)
 
