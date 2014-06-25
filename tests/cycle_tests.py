@@ -1,7 +1,7 @@
 
 from unittest import TestCase
 from skypyblue.core import ConstraintSystem, CycleException, logger
-from skypyblue.models import Method, Constraint, Strength, ConstraintFactory
+from skypyblue.models import Method, Constraint, Strength, ConstraintFactory, Variable
 
 class CycleTest(TestCase):
   def setUp(self):
@@ -9,7 +9,7 @@ class CycleTest(TestCase):
 
   def test_cycle_should_be_detected(self):
     a, b, c, d = self.cs.create_variables(["a", "b", "c", "d"], [1, 2, 3, 0])
-    one = self.cs.create_variable("1", 1)
+    one = Variable("1", 1, self.cs)
 
     cn1 = ConstraintFactory().scale_constraint(b, a, one, one, Strength.STRONG)
     cn2 = ConstraintFactory().scale_constraint(c, b, one, one, Strength.STRONG)
@@ -23,7 +23,7 @@ class CycleTest(TestCase):
 
   def test_cycle_variables_should_be_invalid(self):
     a, b, c, d = self.cs.create_variables(["a", "b", "c", "d"], [1, 2, 3, 0])
-    one = self.cs.create_variable("1", 1)
+    one = Variable("1", 1, self.cs)
 
     cn1 = ConstraintFactory().scale_constraint(b, a, one, one, Strength.STRONG, "cn1")
     cn2 = ConstraintFactory().scale_constraint(c, b, one, one, Strength.STRONG, "cn2")
