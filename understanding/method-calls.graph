@@ -1,73 +1,79 @@
 digraph G {
 	graph [ratio=0.56, ranksep=0.01]
-	node [fontname=Verdana,fontsize=12.0]
-	node [style=filled]
-	node [fillcolor="#EEEEEE"]
-	node [color="#EEEEEE"]
-	edge [color="#31CEF0"]
+	subgraph clustermvine {
+		node [style=filled]
+		node [fillcolor="#CCCCCC"]
+		node [fontname=Verdana,fontsize=12.0]
+		node [color="#EEEEEE"]
+		edge [color="#31CEF0"]
 
-	"add-constraint" [fillcolor="#73C764"];
-	"remove-constraint" [fillcolor="#73C764"];
-	"new-mark" [fillcolor="#73C764"];
-	"build-mvine" [fillcolor="#73C764"];
-	"mvine-grow" [fillcolor="#73C764"];
-	"mvine-revoke-cn" [fillcolor="#73C764"];
-	"mvine-enforce-cn" [fillcolor="#73C764"];
-	"pplan-add" [fillcolor="#73C764"];
+		style = filled
+		color = "#EEEEEE"
+		label = "MVine"
 
-	"add-constraint" -> "update-method-graph";
-	"add-constraint" -> "exec-from-roots";
+		"build-mvine" -> "new-mark";
+		"build-mvine" -> "mvine-enforce-cn";
 
-	"remove-constraint" -> "propagate-walk-strength";
-	"remove-constraint" -> "collect-unenforced";
-	"remove-constraint" -> "update-method-graph";
-	"remove-constraint" -> "exec-from-roots";
+		"mvine-grow" -> "mvine-grow";
+		"mvine-grow" -> "mvine-revoke-cn";
+		"mvine-grow" -> "mvine-enforce-cn";
 
-	"update-method-graph" -> "build-mvine";
-	"update-method-graph" -> "propagate-walk-strength";
-	"update-method-graph" -> "collect-unenforced";
+		"mvine-revoke-cn" -> "mvine-grow";
 
-	"build-mvine" -> "new-mark";
-	"build-mvine" -> "mvine-enforce-cn";
+		"mvine-enforce-cn" -> "mvine-grow";
+	}
+	subgraph clusterconstraintsystem {
+		node [style=filled]
+		node [fillcolor="#CCCCCC"]
+		node [fontname=Verdana,fontsize=12.0]
+		node [color="#EEEEEE"]
+		edge [color="#31CEF0"]
 
-	"mvine-grow" -> "mvine-grow";
-	"mvine-grow" -> "mvine-revoke-cn";
-	"mvine-grow" -> "mvine-enforce-cn";
+		style = filled
+		color = "#EEEEEE"
+		label = "ConstraintSystem"
 
-	"mvine-revoke-cn" -> "mvine-grow";
+		"add-constraint" -> "update-method-graph";
+		"add-constraint" -> "exec-from-roots";
 
-	# "mvine-enforce-cn" -> "possible-method";
-	"mvine-enforce-cn" -> "mvine-grow";
+		"remove-constraint" -> "propagate-walk-strength";
+		"remove-constraint" -> "collect-unenforced";
+		"remove-constraint" -> "update-method-graph";
+		"remove-constraint" -> "exec-from-roots";
 
-	"propagate-walk-strength" -> "new-mark";
-	"propagate-walk-strength" -> "pplan-add";
-	"propagate-walk-strength" -> "any-immediate-upstream-cns-marked";
-	"propagate-walk-strength" -> "compute-walkabout-strengths";
+		"update-method-graph" -> "build-mvine";
+		"update-method-graph" -> "propagate-walk-strength";
+		"update-method-graph" -> "collect-unenforced";
 
 
-	"collect-unenforced" -> "new-mark";
-	"collect-unenforced" -> "collect-unenforced-mark";
+		"propagate-walk-strength" -> "new-mark";
+		"propagate-walk-strength" -> "pplan-add";
+		"propagate-walk-strength" -> "any-immediate-upstream-cns-marked";
+		"propagate-walk-strength" -> "compute-walkabout-strengths";
 
-	"collect-unenforced-mark" -> "collect-unenforced-mark";
 
-	"exec-from-roots" -> "new-mark";
-	"exec-from-roots" -> "pplan-add";
-	"exec-from-roots" -> "any-immediate-upstream-cns-marked";
-	"exec-from-roots" -> "exec-from-cycle";
-	"exec-from-roots" -> "execute-propagate-valid";
+		"collect-unenforced" -> "new-mark";
+		"collect-unenforced" -> "collect-unenforced-mark";
 
-	"execute-propagate-valid" -> "execute-method";
+		"collect-unenforced-mark" -> "collect-unenforced-mark";
 
-	"exec-from-cycle" -> "exec-from-cycle";
+		"exec-from-roots" -> "new-mark";
+		"exec-from-roots" -> "pplan-add";
+		"exec-from-roots" -> "any-immediate-upstream-cns-marked";
+		"exec-from-roots" -> "exec-from-cycle";
+		"exec-from-roots" -> "execute-propagate-valid";
 
-	"pplan-add" -> "pplan-add";
+		"execute-propagate-valid" -> "execute-method";
 
-	"extract-plan" -> "new-mark";
-	"extract-plan" -> "pplan-add";
-	"extract-plan" -> "any-immediate-upstream-cns-marked";
-	"extract-plan" -> "create-valid-plan";
+		"exec-from-cycle" -> "exec-from-cycle";
 
-	"execute-plan" -> "execute-propagate-valid";
+		"pplan-add" -> "pplan-add";
 
-	# "invalidate-plans-on-setting-method" -> "invalidate-constraint-plans";
+		"extract-plan" -> "new-mark";
+		"extract-plan" -> "pplan-add";
+		"extract-plan" -> "any-immediate-upstream-cns-marked";
+		"extract-plan" -> "create-valid-plan";
+
+		"execute-plan" -> "execute-propagate-valid";
+	}
 }
