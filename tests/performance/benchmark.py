@@ -7,8 +7,8 @@ except:
   def cprint(s, attrs):
     print(s)
 
-from deltablue_test import *
-from skypyblue_test import *
+import deltablue_test
+import skypyblue_test
 
 
 def benchmark(constraint_solver, warmUp, numIterations):
@@ -38,13 +38,21 @@ def run_benchmark(args):
     # test size
     innerIter     = int(args[2])
 
-  cprint("Deltablue results", attrs = ['bold'])
-  cprint("================================", attrs = ['bold'])
-  benchmark(lambda: delta_blue(innerIter), warmUp, numIterations)
+  print("Deltablue results: Chain Test")
+  print("================================")
+  benchmark(lambda: deltablue_test.chain_test(innerIter), warmUp, numIterations)
 
-  cprint("Skypyblue results", attrs = ['bold'])
-  cprint("================================", attrs = ['bold'])
-  benchmark(lambda: skypyblue(innerIter), warmUp, numIterations)
+  print("\nSkypyblue results: Chain Test")
+  print("================================")
+  benchmark(lambda: skypyblue_test.chain_test(innerIter), warmUp, numIterations)
+
+  print("\nDeltablue results: Projection Test")
+  print("================================")
+  benchmark(lambda: deltablue_test.projection_test(innerIter), warmUp, numIterations)
+
+  print("\nSkypyblue results: Projection Test")
+  print("================================")
+  benchmark(lambda: skypyblue_test.projection_test(innerIter), warmUp, numIterations)
 
 if __name__ == "__main__":
   run_benchmark(sys.argv[1:])

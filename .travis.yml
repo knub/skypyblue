@@ -11,4 +11,4 @@ script:
     - cd tests
     - python testrunner.py
     - cd performance
-    - python benchmark.py 5 20 100
+    - python benchmark.py 5 20 500
