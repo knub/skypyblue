@@ -1,6 +1,19 @@
 from skypyblue.models import *
-from skypyblue.core import Mvine, Marker
+from skypyblue.core import Mvine, Marker, CycleException
+
 import pdb;
+
+
+def fail_on_cylce(func):
+  def wrapper(self, *args, **kwargs):
+    self._cycle = None
+    res = func(self, *args, **kwargs)
+    if self._cycle is not None:
+      raise CycleException(self._cycle, "Cycle was detected")
+    return res
+  return wrapper
+
+# https://www.cs.washington.edu/research/constraints/solvers/skyblue-cycles.html
 class ConstraintSystem:
 
   def __init__(self):
@@ -10,6 +23,13 @@ class ConstraintSystem:
     self.forced_constraint = None
     self.check_constraints = False
 
+    self.unenforced_constraints = set()
+    self.redetermined_vars = set()
+    self.exec_roots = []
+    self.mark = None
+
+    self._cycle = None
+
   def create_variables(self, names, initialValues):
     assert len(names) == len(initialValues)
     res = []
@@ -17,6 +37,7 @@ class ConstraintSystem:
       res.append(self.create_variable(names[i], initialValues[i]))
     return res
 
+  # TODO: Remove these
   def create_variable(self, name, initialValue):
     variable = Variable(name, initialValue, self)
     self.variables.append(variable)
@@ -44,6 +65,16 @@ class ConstraintSystem:
   def variable_changed(self, var):
     self.change_variable_values([var], [var.get_value()])
 
+  def _check_constraints(self):
+    if self.check_constraints == False:
+      return
+    for constraint in self.constraints:
+      if not constraint.is_enforced():
+        continue
+      check = constraint.check_function(*[var.get_value() for var in constraint.variables])
+      if not check:
+        raise Exception("Constraint %s is not satisfied" % constraint)
+
   def add_stay_constraint(self, variable, strength):
     m = Method([], [variable], lambda: variable.get_value())
     stay_constraint = Constraint(
@@ -53,137 +84,134 @@ class ConstraintSystem:
       [m])
 
     self.add_constraint(stay_constraint)
-    return stay_constraint;
+    return stay_constraint
 
-
+  @fail_on_cylce
   def add_constraint(self, constraint):
     constraint.selected_method = None
     constraint.mark = None
 
     for variable in constraint.variables:
       variable.add_constraint(constraint)
-    exec_roots = self.update_method_graph([constraint])
-    self.exec_from_roots(exec_roots)
+    self.unenforced_constraints = set([constraint])
+    self.exec_roots = []
+    self.update_method_graph()
+    self.exec_from_roots()
 
+    self.constraints.append(constraint)
+    self._check_constraints();
+
+  @fail_on_cylce
   def remove_constraint(self, constraint, skip = False):
     for variable in constraint.variables:
       variable.remove_constraint(constraint)
-
+    self.constraints.remove(constraint)
     if constraint.is_enforced():
       old_outputs = constraint.selected_method.outputs
       constraint.selected_method = None
 
-      exec_roots = []
+      self.exec_roots = []
       for variable in old_outputs:
         variable.determined_by = None
         variable.walk_strength = Strength.WEAKEST
-        exec_roots.append(variable)
+        self.exec_roots.append(variable)
 
       if skip:
         return
 
-      self.propagate_walk_strength(old_outputs)
-      unenforcedConstraints = []
-      self.collect_unenforced(unenforcedConstraints, old_outputs,constraint.strength,True)
-      exec_roots.extend(self.update_method_graph(unenforcedConstraints))
-      self.exec_from_roots(exec_roots)
+      self.propagate_walk_strength(outputs)
+      self.unenforced_constraints = set()
+      self.collect_unenforced(constraint.strength, True)
+      self.update_method_graph()
+      self.exec_from_roots()
 
+    self._check_constraints()
 
-  def update_method_graph(self, unenforced_constraints):
-    exec_roots = []
-    while unenforced_constraints:
-      cn = self.strongest_constraint(unenforced_constraints)
-      unenforced_constraints = [c for c in unenforced_constraints if c != cn]
-      redetermined_vars = []
-      if not Mvine(self.marker).build(cn, redetermined_vars):
-        return exec_roots
-      self.propagate_walk_strength([cn] + redetermined_vars)
-      self.collect_unenforced(unenforced_constraints, redetermined_vars, cn.strength, False)
-      exec_roots.append(cn)
-      for var in redetermined_vars:
+  def update_method_graph(self):
+    while self.unenforced_constraints:
+      constraint = self.remove_strongest_constraint()
+      self.redetermined_vars.clear()
+      if not Mvine(self.marker).build(constraint, self.redetermined_vars):
+        return
+      self.propagate_walk_strength(self.redetermined_vars.union([constraint]))
+      self.collect_unenforced(constraint.strength, False)
+      self.exec_roots.append(constraint)
+      for var in self.redetermined_vars:
         if var.determined_by is None:
-          exec_roots.append(var)
-    return exec_roots
+          self.exec_roots.append(var)
 
-  def strongest_constraint(self, constraints):
-    constraints.sort(key = lambda cn: cn.strength, reverse = True)
-    return constraints[0]
+  def remove_strongest_constraint(self):
+    cn = sorted(self.unenforced_constraints, key = lambda cn: cn.strength, reverse = True)[0]
+    self.unenforced_constraints.remove(cn)
+    return cn
 
-  def weakest_constraint(self, constraints):
-    constraints.sort(key=lambda cn: cn.strength)
-    return constraints[0]
+  # not used yet
+  # def weakest_constraint(self, constraints):
+  #   return sorted(constraints, key = lambda cn: cn.strength)[0]
 
   def propagate_walk_strength(self, roots):
     self._new_mark()
 
     for cn in self.pplan_add(roots):
-      if self.any_immediate_upstream_marked(cn):
-        for var in cn.selected_method.inputs:
-          if var.determined_by is not None and var.determined_by.mark == self.mark:
-            var.walk_strength = Strength.WEAKEST
+      for var in cn.selected_method.inputs:
+        if var.determined_by is not None and var.determined_by.mark == self.mark:
+          var.walk_strength = Strength.WEAKEST
       self.compute_walkabout_strengths(cn)
       cn.mark = None
 
+  def compute_walkabout_strengths(self, cn):
+    outs = cn.selected_method.outputs
+    for out_var in outs:
+      max_strengths = [self.max_out(mt, outs) for mt in cn.methods if out_var not in mt.outputs]
+      max_strengths.append(cn.strength)
+      out_var.walk_strength = min(max_strengths)
+
+
+
+  def max_out(self, mt, current_outputs):
+    return max([var.walk_strength for var in mt.outputs if var not in current_outputs])
+
+  def collect_unenforced(self, collection_strength, collect_equal_strength):
+    self._new_mark()
+    for var in self.redetermined_vars:
+      stack = [var]
+      while stack:
+        cur_var = stack.pop()
+        for cn in cur_var.constraints:
+          if cn == cur_var.determined_by or cn.mark == self.mark:
+            continue
+          cn.mark = self.mark
+          if cn.is_enforced():
+            stack.extend(cn.selected_method.outputs)
+          elif Strength.weaker(cn.strength, collection_strength) or \
+                (collect_equal_strength and (cn.strength == collection_strength)):
+            self.unenforced_constraints.add(cn)
+
   def any_immediate_upstream_marked(self, cn):
     for var in cn.selected_method.inputs:
-        if var.determined_by != None and var.determined_by.mark == self.mark:
-          return True
+      if var.determined_by is not None and var.determined_by.mark == self.mark:
+        return True
     return False
 
-  def compute_walkabout_strengths(self, cn):
-    current_outputs = cn.selected_method.outputs
-    for out_var in current_outputs:
-      min_strength = cn.strength
-      for mt in cn.methods:
-        if not out_var in mt.outputs:
-          max_strength = self.max_out(mt, current_outputs)
-          if Strength.weaker(max_strength, min_strength):
-            min_strength = max_strength
-      out_var.walk_strength = min_strength
-
-  def collect_unenforced(self, unenforced_cns, vars, collection_strength, collect_equal_strength):
-    self._new_mark()
-    for var in vars:
-      collected = self.collect_unenforced_mark(unenforced_cns, var, collection_strength, collect_equal_strength)
-      for val in set(collected):
-        if val not in unenforced_cns:
-          unenforced_cns.append(val)
-    return unenforced_cns
-
-  def collect_unenforced_mark(self, unenforced_cns, var, collection_strength, collect_equal_strength):
-    for cn in var.constraints:
-      if cn != var.determined_by and cn.mark != self.mark:
-        cn.mark = self.mark
-        if cn.is_enforced():
-          for out_var in cn.selected_method.outputs:
-            self.collect_unenforced_mark(unenforced_cns, out_var, collection_strength, collect_equal_strength)
-        elif Strength.weaker(cn.strength, collection_strength) or \
-              (collect_equal_strength and (cn.strength == collection_strength)):
-          unenforced_cns.append(cn)
-    return unenforced_cns
-
-
-  def exec_pplan_create(self, exec_roots):
-    exec_pplan = []
-
-    for cn in exec_roots:
-      if isinstance(cn, Constraint):
-        cn.add_to_pplan(exec_pplan, self.mark)
-
-    for var in exec_roots:
-      if isinstance(var, Variable):
+  def exec_pplan_create(self):
+    cn_pplan = []
+    var_pplan = []
+    for cn_or_var in self.exec_roots:
+      if isinstance(cn_or_var, Constraint):
+        cn = cn_or_var
+        cn.add_to_pplan(cn_pplan, self.mark)
+      elif isinstance(cn_or_var, Variable):
+        var = cn_or_var
         if var.determined_by is None and not var.valid:
-          exec_pplan.extend(var.add_to_pplan([], self.mark))
+          var.add_to_pplan(var_pplan, self.mark)
           var.valid = True
 
-    return exec_pplan
+    return cn_pplan + var_pplan
 
-  def exec_from_roots(self, exec_roots):
+  def exec_from_roots(self):
     self._new_mark()
-    exec_pplan = self.exec_pplan_create(exec_roots)
 
-    while exec_pplan:
-      cn = exec_pplan.pop()
+    for cn in reversed(self.exec_pplan_create()):
       if cn.mark == self.mark:
         if self.any_immediate_upstream_marked(cn):
           self.exec_from_cycle(cn)
@@ -192,16 +220,17 @@ class ConstraintSystem:
           self.execute_propagate_valid(cn)
 
   def execute_propagate_valid(self, cn):
-    inputs_valid = True
-    for var in cn.selected_method.inputs:
-      if not var.valid:
-        inputs_valid = False
+    inputs_valid = not cn.selected_method.has_invalid_vars()
+
     if inputs_valid:
       cn.selected_method.execute()
+
     for var in cn.selected_method.outputs:
       var.valid = inputs_valid
 
   def exec_from_cycle(self, cn):
+    if self._cycle is None: self._cycle = set()
+    self._cycle.add(cn)
     if cn.mark == self.mark:
       cn.mark = None
       for var in cn.selected_method.outputs:
@@ -214,18 +243,16 @@ class ConstraintSystem:
 
   def pplan_add(self, objs):
     pplan = []
-    if not isinstance(objs, list):
-      raise Exception("accepting only list of objs!")
+    if not isinstance(objs, set):
+      raise Exception("accepting only set of objs!")
     for el in objs:
       el.add_to_pplan(pplan, self.mark)
     return pplan
 
   def _new_mark(self):
     self.marker.new_mark()
+    self.mark = self.marker.mark
 
-  @property
-  def mark(self):
-    return self.marker.mark
 
   # create-valid-plan in now Plan(....)
   # invalidate-constraint-plans is now constraint.invalidate_plans()
@@ -254,15 +281,6 @@ class ConstraintSystem:
         self.execute_propagate_valid(cn)
     else:
       raise ValueError("trying to execute invalid plan")
-
-
-  def max_out(self, mt, current_outputs):
-    max_strength = Strength.WEAKEST
-    for var in mt.outputs:
-      if not var in current_outputs and \
-        Strength.weaker(max_strength, var.walk_strength):
-        max_strength = var.walk_strength
-    return max_strength
 
 
 

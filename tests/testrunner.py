@@ -9,6 +9,7 @@ if __name__ != "__main__": exit()
 
 import unittest, sys
 sys.path.append("../src")
+sys.path.append("./performance")
 
 
 from constraint_system_tests import *
@@ -21,6 +22,9 @@ from extended_midpoint_tests import *
 from update_method_graph_tests import *
 from constraint_tests import *
 from constraint_factory_tests import *
+from cycle_tests import *
+
+from benchmark import *
+run_benchmark([2, 0, 50])
 
 unittest.main()
-

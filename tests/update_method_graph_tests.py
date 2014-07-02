@@ -10,7 +10,7 @@ from fixture import Fixture
 
 
 class UpdateMethodGraphTests(TestCase):
-  
+
   def setUp(self):
     self.build_mvine = Mvine.build
     Mvine.build = Mock(return_value = True)
@@ -23,11 +23,12 @@ class UpdateMethodGraphTests(TestCase):
      Mvine.build = self.build_mvine
 
   def test_update_method_graph_with_no_constraints(self):
-    exec_roots = self.cs.update_method_graph([])
-    self.assertEqual(exec_roots, [])
+    self.cs.update_method_graph()
+    self.assertEqual([], self.cs.exec_roots)
 
   def test_update_method_graph_with_a_constraint(self):
     self.cs.build_mvine = Mock(return_value = True)
     c = self.f.a_equals_b_plus_2_constraint
-    exec_roots = self.cs.update_method_graph([c])
-    self.assertEqual(exec_roots, [c])
+    self.cs.unenforced_constraints.add(c)
+    self.cs.update_method_graph()
+    self.assertEqual([c], self.cs.exec_roots)

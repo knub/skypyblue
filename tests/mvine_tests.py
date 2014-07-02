@@ -13,44 +13,40 @@ new_mark = marker.new_mark
 class MVineTests(TestCase):
 
   def setUp(self):
-    self.marker = marker;
+    self.marker = marker
     self.mvine = Mvine(self.marker)
     self.cs = ConstraintSystem()
 
-  def test_mvine_revoke_cn_fails(self):
-    self.mvine.grow = Mock(return_value = False)
-    cn = Constraint(None, Strength.WEAKEST, [], [])
-    cn.mark = new_mark()
+  def test_build_mvine(self):
+    v1, v2, v3 = self.cs.create_variables(["v1", "v2", "v3"], [3, 4, 5])
 
-    new_mark()
-    not_revoked = self.mvine.revoke_cn(cn)
+    m1 = Method([v1, v2], [v3], lambda v1, v2: (v1 + v2) / 2)
 
-    self.assertFalse(not_revoked)
-    self.assertTrue(cn.mark is None)
+    m2 = Method([v3, v2], [v1], lambda v3, v2: 2 * v3 - v2)
 
-  def test_mvine_revoke_cn_succeeds_case1(self):
-    self.mvine.grow = Mock(return_value = True)
+    m3 = Method([v3, v1], [v2], lambda v3, v1: 2 * v3 - v1)
+    cn = Constraint(
+        lambda v1, v2, v3: True,
+        Strength.STRONG,
+        [v1, v2, v3],
+        [m1, m2, m3])
 
-    cn = Constraint(None, Strength.WEAKEST, [], [])
-    v1 = self.cs.create_variable("v1", 1)
-    v2 = self.cs.create_variable("v2", 2)
-    v3 = self.cs.create_variable("v3", 3)
-    for v in [v1,v2,v3]: v.walk_strength = Strength.WEAK
+    self.assertIsNone(v1.determined_by)
+    self.assertIsNone(v2.determined_by)
+    self.assertIsNone(v3.determined_by)
 
-    m = Method([v1, v2], v3, None)
-    cn.selected_method = m
-    v3.determined_by = cn
+    self.assertEqual(3, v1.get_value())
+    self.assertEqual(4, v2.get_value())
+    self.assertEqual(5, v3.get_value())
 
-    new_mark()
-    not_revoked = self.mvine.revoke_cn(cn)
+    redetermined_vars = set()
+    self.assertTrue(self.mvine.build(cn, redetermined_vars))
 
-    self.assertTrue (not_revoked)
-    self.assertEqual(Strength.WEAK, v1.walk_strength)
-    self.assertEqual(Strength.WEAK, v2.walk_strength)
-    self.assertEqual(Strength.WEAKEST, v3.walk_strength)
-    self.assertTrue (v3.determined_by is None)
-    self.assertTrue (v3 in self.mvine.redetermined_vars)
-    self.assertTrue (cn.selected_method is None)
+    self.assertEqual(set([v3]), redetermined_vars)
+    self.assertIsNone(v1.determined_by)
+    self.assertIsNone(v2.determined_by)
+    self.assertEqual(cn, v3.determined_by)
+    self.assertIsNotNone(cn.mark)
 
   def test_mvine_revoke_cn_succeeds_case2(self):
     # case 2 - v3's mark is the same as passed to mvine_revoke_cn

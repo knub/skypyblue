@@ -1,30 +1,12 @@
 import unittest
 from skypyblue.core import ConstraintSystem
 from skypyblue.models import Constraint, Strength, Method
+from point import Point
 
-class Point(object):
-  def __init__(self, x, y):
-    self.X = x
-    self.Y = y
-
-  def distance(self, other):
-    dx = self.X - other.X
-    dy = self.Y - other.Y
-    return math.sqrt(dx ** 2 + dy ** 2)
-
-  def isMidpoint(self, point1, point2):
-    return self.X == (point1.X + point2.X) / 2 and self.Y == (point1.Y + point2.Y) / 2
-
-  def print_position(self):
-    print(self.X, '@', self.Y)
-
-  def __repr__(self):
-    return "(%s, %s)" % (self.X, self.Y)
-
-class MidpointTestClass(unittest.TestCase):
-  __name__ = "MidpointTestClass"
+class MidpointTest(unittest.TestCase):
+  __name__ = "MidpointTest"
   def setUp(self):
-    self.constraint_system =ConstraintSystem()
+    self.constraint_system = ConstraintSystem()
     self.point1 = self.constraint_system.create_variable("Point 1", Point(4, 10))
     self.point2 = self.constraint_system.create_variable("Point 2", Point(10, 30))
     self.midpoint = self.constraint_system.create_variable("midpoint", Point(0, 0))
@@ -40,9 +22,9 @@ class MidpointTestClass(unittest.TestCase):
 
 
     constraint = Constraint(
-        lambda point1, point2, midpoint: midpoint.isMidpoint(point1, point2),
-        Strength.STRONG, 
-        [self.point1, self.point2, self.midpoint], 
+        lambda point1, point2, midpoint: midpoint.is_midpoint(point1, point2),
+        Strength.STRONG,
+        [self.point1, self.point2, self.midpoint],
         [mMp, mP1, mP2])
 
     self.constraint_system.add_constraint(constraint)
@@ -52,7 +34,7 @@ class MidpointTestClass(unittest.TestCase):
     midpoint = self.midpoint.get_value()
     point1 = self.point1.get_value()
     point2 = self.point2.get_value()
-    self.assertTrue(midpoint.isMidpoint(point1,point2))
+    self.assertTrue(midpoint.is_midpoint(point1,point2))
 
   def test_change_point1(self):
     self.point1.set_value(Point(0, 0))
