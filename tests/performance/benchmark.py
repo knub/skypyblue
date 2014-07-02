@@ -1,12 +1,5 @@
 #!/usr/bin/env python3
 import sys, os, time
-
-try:
-  from termcolor import colored, cprint
-except:
-  def cprint(s, attrs):
-    print(s)
-
 import deltablue_test
 import skypyblue_test
 
