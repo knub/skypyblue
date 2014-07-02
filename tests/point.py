@@ -21,3 +21,6 @@ class Point(object):
 
   def equals(self, point):
     return self.X == point.X and self.Y == point.Y
+
+  def to_array(self):
+    return [self.X,self.Y]
