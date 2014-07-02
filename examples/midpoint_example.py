@@ -6,11 +6,11 @@ from skypyblue.models import Method, Constraint, Strength
 from point import Point
 
 cs = ConstraintSystem()
-pm_var = cs.create_variable("pm", [600, 400])
-p1_var = cs.create_variable("p1", [250, 100])
-p2_var = cs.create_variable("p2", [200, 400])
-p3_var = cs.create_variable("p1", [100, 150])
-p4_var = cs.create_variable("p2", [100, 250])
+pm_var = Variable("pm", [600, 400], cs)
+p1_var = Variable("p1", [250, 100], cs)
+p2_var = Variable("p2", [200, 400], cs)
+p3_var = Variable("p1", [100, 150], cs)
+p4_var = Variable("p2", [100, 250], cs)
 
 
 def all_points():

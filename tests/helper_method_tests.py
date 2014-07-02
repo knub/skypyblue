@@ -14,8 +14,8 @@ class HelperTests(TestCase):
 
   def test_max_out(self):
     cs = ConstraintSystem()
-    v1 = cs.create_variable("v1", 13)
-    v2 = cs.create_variable("v2", 12)
+    v1 = Variable("v1", 13, cs)
+    v2 = Variable("v2", 12, cs)
     method = Method(v1, v2, lambda v1: v1 - 1)
 
     self.assertEqual(Strength.WEAKEST, cs.max_out(method, [v1]))

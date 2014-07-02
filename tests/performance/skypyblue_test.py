@@ -13,7 +13,6 @@ v1 -> v2 -> v3 -> v4 ... -> vn
 """
 def chain_test(n):
   cs = ConstraintSystem()
-  cf = ConstraintFactory()
   prev, first, last = None, None, None
 
   # We need to go up to n inclusively, as this is done
@@ -23,7 +22,7 @@ def chain_test(n):
     v = Variable(name, 0, cs)
 
     if prev is not None:
-      c = cf.equality_constraint(prev, v, Strength.STRONG)
+      c = ConstraintFactory.equality_constraint(prev, v, Strength.STRONG)
       cs.add_constraint(c)
     if i == 0:
       first = v
@@ -52,7 +51,6 @@ v5 -> v6
 """
 def projection_test(n):
   cs = ConstraintSystem()
-  cf = ConstraintFactory()
   scale = Variable("scale", 10, cs)
   offset = Variable("offset", 1000, cs)
   src, dest = None, None
@@ -62,7 +60,7 @@ def projection_test(n):
     dest = Variable("dest%s" % i, i, cs)
     dests.append(dest)
     src.stay()
-    c = cf.scale_constraint(dest, src, scale, offset, Strength.STRONG)
+    c = ConstraintFactory.scale_constraint(dest, src, scale, offset, Strength.STRONG)
     cs.add_constraint(c)
 
   src.set_value(17)

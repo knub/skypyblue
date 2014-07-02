@@ -1,18 +1,18 @@
 import unittest
 import math
 from skypyblue.core import ConstraintSystem
-from skypyblue.models import Constraint, Strength, Method
+from skypyblue.models import Constraint, Strength, Method, Variable
 from point import Point
 
 class ExtendedMidpointTest(unittest.TestCase):
   __name__ = "ExtendedMidpointTest"
   def setUp(self):
-    self.constraint_system =ConstraintSystem()
-    self.point1 = self.constraint_system.create_variable("Point 1", Point(4, 10))
-    self.point2 = self.constraint_system.create_variable("Point 2", Point(10, 30))
-    self.point3 = self.constraint_system.create_variable("Point 3", Point(50, 20))
-    self.point4 = self.constraint_system.create_variable("Point 4", Point(100, 30))
-    self.midpoint = self.constraint_system.create_variable("midpoint", Point(0, 0))
+    self.constraint_system = ConstraintSystem()
+    self.point1 = Variable("Point 1", Point(4, 10), self.constraint_system)
+    self.point2 = Variable("Point 2", Point(10, 30), self.constraint_system)
+    self.point3 = Variable("Point 3", Point(50, 20), self.constraint_system)
+    self.point4 = Variable("Point 4", Point(100, 30), self.constraint_system)
+    self.midpoint = Variable("midpoint", Point(0, 0), self.constraint_system)
 
     mpmp3p4 = Method([self.midpoint, self.point3, self.point4], [self.point1, self.point2],
       lambda pm, p3, p4: (

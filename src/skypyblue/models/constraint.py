@@ -1,4 +1,6 @@
 import inspect
+from skypyblue.core import logger
+
 
 class Constraint:
   def __init__(self, check_function, strength, variables, methods, name = ""):
@@ -26,13 +28,16 @@ class Constraint:
     self.name = name
 
   def add_to_pplan(self, pplan, done_mark):
+    # logger.DEBUG("adding cns from %s to %s" %(self, pplan))
+    insert_idx = len(pplan)
     stack = [self]
     while stack:
       cur_cn = stack.pop()
       if cur_cn.selected_method is None or cur_cn.mark == done_mark:
         continue
       cur_cn.mark = done_mark
-      pplan.insert(0, cur_cn)
+      pplan.insert(insert_idx, cur_cn)
+      # logger.DEBUG("added %s to pplan" %(cur_cn))
       for var in cur_cn.selected_method.outputs:
         for var_cn in var.constraints:
           if var_cn != var.determined_by:
@@ -46,8 +51,7 @@ class Constraint:
 
   def __str__(self):
     if self.name:
-      return "<Constraint '%s' %s>" % (self.name,
-        inspect.getsource(self.check_function).strip().strip(","))
+      return "<Constraint '%s'>" % (self.name)
     else:
       return "<Constraint %s>" % (
         inspect.getsource(self.check_function).strip().strip(","))

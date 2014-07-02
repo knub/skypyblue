@@ -1,5 +1,5 @@
 from skypyblue.models import Strength
-
+# from skypyblue.core import logger
 class Mvine:
   def __init__(self, marker):
     self.marker = marker
@@ -11,6 +11,7 @@ class Mvine:
 
   def build(self, cn, redetermined_vars):
     self.marker.new_mark()
+    # logger.DEBUG("building from: %s" %cn)
     self.mark = self.marker.mark
     self.stack = [cn]
     self.root_strength = cn.strength
@@ -18,6 +19,7 @@ class Mvine:
     if not self.determine_enforced_and_revoked():
       return False
 
+    # logger.DEBUG("revoked: %s, enforced: %s" %(self.revoked, [cn[0] for cn in self.enforced]))
     for cn in self.revoked:
       self.reset_outputs(cn.selected_method)
       cn.selected_method = None
@@ -29,7 +31,10 @@ class Mvine:
       mt.mark = None
       for var in mt.outputs:
         var.determined_by = cn
+        # logger.DEBUG("adding %s to redetermined_vars" %var)
         self.redetermined_vars.add(var)
+
+    # logger.DEBUG("redetermined_vars: %s" %(self.redetermined_vars))
 
     return True
 
@@ -81,6 +86,7 @@ class Mvine:
       if var.mark != self.mark:
         var.determined_by = None
         var.walk_strength = Strength.WEAKEST
+        # logger.DEBUG("reseting %s and adding to redetermined_vars" %var)
         self.redetermined_vars.add(var)
 
   def next_possible_method(self, cn):
