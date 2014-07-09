@@ -63,7 +63,6 @@ class Constraint(object):
     self.valid_plans.append(plan)
 
   def invalidate_plans(self):
-    # invalid_plans = []
     for plan in self.valid_plans:
       plan.valid = False
       for constraint in plan.root_constraints + plan.good_constraints + plan.bad_constraints:
