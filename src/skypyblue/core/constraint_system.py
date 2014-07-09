@@ -13,7 +13,7 @@ def fail_on_cylce(func):
   return wrapper
 
 # https://www.cs.washington.edu/research/constraints/solvers/skyblue-cycles.html
-class ConstraintSystem:
+class ConstraintSystem(object):
 
   def __init__(self):
     self.marker = Marker()
@@ -274,12 +274,10 @@ class ConstraintSystem:
     good_constraints = []
     bad_constraints = []
     self._new_mark()
-    pplan = self.pplan_add(self.exec_roots)
 
-    while pplan:
-      cn = pplan.pop()
+    for cn in reversed(self.pplan_add(self.exec_roots)):
       if cn.mark != self.mark:
-        pass
+        continue
       elif self.any_immediate_upstream_marked(cn):
         bad_constraints.append(cn)
       else:

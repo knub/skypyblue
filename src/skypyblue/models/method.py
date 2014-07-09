@@ -1,4 +1,4 @@
-class Method:
+class Method(object):
   def __init__(self, in_vars, out_vars, method):
     """
     in_vars:\tlist of (or single object) skypyblue.models.variables.Variable that are handled as input

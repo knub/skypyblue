@@ -1,6 +1,6 @@
 from skypyblue.models import Constraint
 
-class Plan:
+class Plan(object):
   def __init__(self, root_constraints, good_constraints, bad_constraints, valid):
     """
     root_constraints \tconstraints used to construct this plan
@@ -12,6 +12,6 @@ class Plan:
     self.good_constraints = good_constraints
     self.bad_constraints = bad_constraints
     self.valid = valid
-
-    for cn in self.root_constraints + self.good_constraints + self.bad_constraints:
+    cns = self.root_constraints + self.good_constraints + self.bad_constraints
+    for cn in cns:
         cn.add_valid_plan(self)

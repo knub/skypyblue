@@ -21,4 +21,4 @@ class ConstraintSystemTest(unittest.TestCase):
   def test_variable_constraints_is_set_after_remove_constraint(self):
     self.cs.add_constraint(self.c1)
     self.cs.remove_constraint(self.c1)
-    self.assertEqual(set([]), self.v1.constraints)
+    self.assertEqual(set(), self.v1.constraints)
