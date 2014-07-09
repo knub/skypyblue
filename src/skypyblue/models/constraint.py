@@ -23,7 +23,7 @@ class Constraint:
     self.methods = methods if isinstance(methods, list) else [methods]
 
     self._selected_method = None
-    self.valid_plans = []
+    self.valid_plans = set()
     self.mark = None
     self.name = name
 
@@ -60,15 +60,17 @@ class Constraint:
     return str(self)
 
   def add_valid_plan(self, plan):
-    self.valid_plans.append(plan)
+    self.valid_plans.add(plan)
 
   def invalidate_plans(self):
+    invalid_plans = set()
     for plan in self.valid_plans:
       plan.valid = False
       for constraint in plan.root_constraints.union(plan.good_constraints).union(plan.bad_constraints):
         if self != constraint:
-          self.valid_plans.remove(plan)
+          invalid_plans.add(plan)
 
+    self.valid_plans.difference(invalid_plans)
     self.valid_plans.clear()
 
   def invalidate_plans_on_setting_method(self, method):
