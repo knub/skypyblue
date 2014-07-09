@@ -139,12 +139,11 @@ class ConstraintSystem:
       self.propagate_walk_strength(self.redetermined_vars.union([constraint]))
       self.collect_unenforced(constraint.strength, False)
       self.exec_roots.add(constraint)
-      for var in self.redetermined_vars:
-        if var.determined_by is None:
-          for var_constraint in var.constraints:
-            if var_constraint.is_enforced():
-              self.exec_roots.add(var_constraint)
-
+      self.exec_roots.union([var_constraint \
+        for var in self.redetermined_vars \
+          for var_constraint in var.constraints \
+            if var.determined_by is None and \
+              var_constraint.is_enforced()])
     # logger.DEBUG("exec_roots: %s" %self.exec_roots)
 
   def remove_strongest_constraint(self):
