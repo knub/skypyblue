@@ -24,7 +24,7 @@ class ConstraintSystem:
 
     self.unenforced_constraints = set()
     self.redetermined_vars = set()
-    self.exec_roots = set()
+    self.exec_roots = []
     self.mark = None
     self.plan = None
 
@@ -87,7 +87,7 @@ class ConstraintSystem:
     for variable in constraint.variables:
       variable.add_constraint(constraint)
     self.unenforced_constraints = set([constraint])
-    self.exec_roots.clear()
+    self.exec_roots = []
 
     self.update_method_graph()
     self.extract_plan()
@@ -107,13 +107,13 @@ class ConstraintSystem:
       old_outputs = set(constraint.selected_method.outputs)
       constraint.selected_method = None
 
-      self.exec_roots.clear()
+      self.exec_roots = []
       for variable in old_outputs:
         variable.determined_by = None
         variable.walk_strength = Strength.WEAKEST
         for var_constraint in variable.constraints:
             if var_constraint.is_enforced():
-              self.exec_roots.add(var_constraint)
+              self.exec_roots.append(var_constraint)
 
       if skip:
         return
@@ -138,8 +138,8 @@ class ConstraintSystem:
         continue
       self.propagate_walk_strength(self.redetermined_vars.union([constraint]))
       self.collect_unenforced(constraint.strength, False)
-      self.exec_roots.add(constraint)
-      self.exec_roots.union([var_constraint \
+      self.exec_roots.append(constraint)
+      self.exec_roots.extend([var_constraint \
         for var in self.redetermined_vars \
           for var_constraint in var.constraints \
             if var.determined_by is None and \
@@ -255,7 +255,7 @@ class ConstraintSystem:
 
   def pplan_add(self, objs):
     pplan = []
-    if not isinstance(objs, set):
+    if not isinstance(objs, set) and not isinstance(objs, list):
       raise Exception("accepting only set of objs! Got %s of type %s" %(objs, type(objs)))
     for el in objs:
       el.add_to_pplan(pplan, self.mark)
@@ -271,8 +271,8 @@ class ConstraintSystem:
   # invalidate-constraint-plans is now constraint.invalidate_plans()
   # invalidate_plans_on_setting_method moved to constraint
   def extract_plan(self):
-    good_constraints = set()
-    bad_constraints = set()
+    good_constraints = []
+    bad_constraints = []
     self._new_mark()
     pplan = self.pplan_add(self.exec_roots)
 
@@ -281,10 +281,10 @@ class ConstraintSystem:
       if cn.mark != self.mark:
         pass
       elif self.any_immediate_upstream_marked(cn):
-        bad_constraints.add(cn)
+        bad_constraints.append(cn)
       else:
         cn.mark = None
-        good_constraints.add(cn)
+        good_constraints.append(cn)
     self.plan = Plan(self.exec_roots, good_constraints, bad_constraints, True)
 
 

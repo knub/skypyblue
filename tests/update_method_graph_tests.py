@@ -24,11 +24,11 @@ class UpdateMethodGraphTests(TestCase):
 
   def test_update_method_graph_with_no_constraints(self):
     self.cs.update_method_graph()
-    self.assertEqual(set(), self.cs.exec_roots)
+    self.assertEqual([], self.cs.exec_roots)
 
   def test_update_method_graph_with_a_constraint(self):
     self.cs.build_mvine = Mock(return_value = True)
     c = self.f.a_equals_b_plus_2_constraint
     self.cs.unenforced_constraints.add(c)
     self.cs.update_method_graph()
-    self.assertEqual(set([c]), self.cs.exec_roots)
+    self.assertEqual([c], self.cs.exec_roots)

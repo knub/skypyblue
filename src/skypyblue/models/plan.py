@@ -13,5 +13,5 @@ class Plan:
     self.bad_constraints = bad_constraints
     self.valid = valid
 
-    for cn in self.root_constraints.union(self.good_constraints).union(self.bad_constraints):
+    for cn in self.root_constraints + self.good_constraints + self.bad_constraints:
         cn.add_valid_plan(self)
