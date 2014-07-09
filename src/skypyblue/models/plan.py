@@ -14,5 +14,4 @@ class Plan:
     self.valid = valid
 
     for cn in self.root_constraints.union(self.good_constraints).union(self.bad_constraints):
-      if isinstance(cn, Constraint):
         cn.add_valid_plan(self)

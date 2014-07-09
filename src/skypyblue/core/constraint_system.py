@@ -111,7 +111,9 @@ class ConstraintSystem:
       for variable in old_outputs:
         variable.determined_by = None
         variable.walk_strength = Strength.WEAKEST
-        self.exec_roots.add(variable)
+        for var_constraint in variable.constraints:
+            if var_constraint.is_enforced():
+              self.exec_roots.add(var_constraint)
 
       if skip:
         return
@@ -139,7 +141,9 @@ class ConstraintSystem:
       self.exec_roots.add(constraint)
       for var in self.redetermined_vars:
         if var.determined_by is None:
-          self.exec_roots.add(var)
+          for var_constraint in var.constraints:
+            if var_constraint.is_enforced():
+              self.exec_roots.add(var_constraint)
 
     # logger.DEBUG("exec_roots: %s" %self.exec_roots)
 
