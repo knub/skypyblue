@@ -57,24 +57,24 @@ class ConstraintTests(TestCase):
     self.assertEqual(mark2, self.cn.mark)
 
 
-  def test_adding_iterative_should_be_in_the_right_order(self):
-    cs = ConstraintSystem()
+  # def test_adding_iterative_should_be_in_the_right_order(self):
+  #   cs = ConstraintSystem()
 
-    all_vars = cs.create_variables(["a", "b", "c"], [1, 2, 3])
-    a, b, c = all_vars
+  #   all_vars = cs.create_variables(["a", "b", "c"], [1, 2, 3])
+  #   a, b, c = all_vars
 
-    m1 = Method([a, c], [b], lambda a,c: a + c)
-    m2 = Method([b, c], [a], lambda b,c: b - c)
+  #   m1 = Method([a, c], [b], lambda a,c: a + c)
+  #   m2 = Method([b, c], [a], lambda b,c: b - c)
 
-    cn = Constraint(lambda a,b,c: a + c == b, Strength.STRONG, [a, b, c], [m1, m2], "cn1")
+  #   cn = Constraint(lambda a,b,c: a + c == b, Strength.STRONG, [a, b, c], [m1, m2], "cn1")
 
-    self.cs.add_constraint(cn)
+  #   self.cs.add_constraint(cn)
 
-    a.stay()
-    a_stay_cn = a.stay_constraint
+  #   a.stay()
+  #   a_stay_cn = a.stay_constraint
 
-    c.set_value(8)
-    c_set_cn = cs.forced_constraint
+  #   c.set_value(8)
+  #   c_set_cn = cs.forced_constraint
 
-    cs.exec_roots = [c_set_cn, a_stay_cn]
-    self.assertEqual([cn, c_set_cn, a_stay_cn], cs.exec_pplan_create())
+  #   cs.exec_roots = [c_set_cn, a_stay_cn]
+  #   self.assertEqual([cn, c_set_cn, a_stay_cn], cs.exec_pplan_create())

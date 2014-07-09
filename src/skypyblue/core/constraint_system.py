@@ -6,10 +6,9 @@ import pdb
 
 def fail_on_cylce(func):
   def wrapper(self, *args, **kwargs):
-    self._cycle = None
     res = func(self, *args, **kwargs)
-    if self._cycle is not None:
-      raise CycleException(self._cycle, "Cycle was detected")
+    if self.plan.bad_constraints:
+      raise CycleException(self.plan.bad_constraints, "Cycle was detected")
     return res
   return wrapper
 
@@ -25,8 +24,9 @@ class ConstraintSystem:
 
     self.unenforced_constraints = set()
     self.redetermined_vars = set()
-    self.exec_roots = []
+    self.exec_roots = set()
     self.mark = None
+    self.plan = None
 
     self._cycle = None
 
@@ -51,9 +51,7 @@ class ConstraintSystem:
       [m], "set")
 
     if self.forced_constraint is not None:
-      # logger.DEBUG("removed %s" %(self.forced_constraint))
       self.remove_constraint(self.forced_constraint, skip = True)
-    # logger.DEBUG(", ".join([str(var.determined_by) for var in self.variables]))
     self.forced_constraint = cn
     self.add_constraint(cn)
 
@@ -89,10 +87,12 @@ class ConstraintSystem:
     for variable in constraint.variables:
       variable.add_constraint(constraint)
     self.unenforced_constraints = set([constraint])
-    self.exec_roots = []
+    self.exec_roots.clear()
 
     self.update_method_graph()
-    self.exec_from_roots()
+    self.extract_plan()
+
+    self.execute_plan()
 
     self.constraints.append(constraint)
     self._check_constraints()
@@ -107,11 +107,11 @@ class ConstraintSystem:
       old_outputs = set(constraint.selected_method.outputs)
       constraint.selected_method = None
 
-      self.exec_roots = []
+      self.exec_roots.clear()
       for variable in old_outputs:
         variable.determined_by = None
         variable.walk_strength = Strength.WEAKEST
-        self.exec_roots.append(variable)
+        self.exec_roots.add(variable)
 
       if skip:
         return
@@ -120,7 +120,11 @@ class ConstraintSystem:
       self.unenforced_constraints = set()
       self.collect_unenforced(constraint.strength, True)
       self.update_method_graph()
-      self.exec_from_roots()
+
+      self.extract_plan()
+      self.execute_plan()
+
+      # self.exec_from_roots()
 
     self._check_constraints()
 
@@ -132,10 +136,10 @@ class ConstraintSystem:
         continue
       self.propagate_walk_strength(self.redetermined_vars.union([constraint]))
       self.collect_unenforced(constraint.strength, False)
-      self.exec_roots.append(constraint)
+      self.exec_roots.add(constraint)
       for var in self.redetermined_vars:
         if var.determined_by is None:
-          self.exec_roots.append(var)
+          self.exec_roots.add(var)
 
     # logger.DEBUG("exec_roots: %s" %self.exec_roots)
 
@@ -195,33 +199,33 @@ class ConstraintSystem:
   def immediate_marked_upstream(self, cn):
     return [var.determined_by for var in cn.selected_method.inputs if var.determined_by is not None and var.determined_by.mark == self.mark]
 
-  def exec_pplan_create(self):
-    cn_pplan = []
-    var_pplan = []
-    for cn_or_var in self.exec_roots:
-      if isinstance(cn_or_var, Constraint):
-        cn = cn_or_var
-        cn.add_to_pplan(cn_pplan, self.mark)
-      elif isinstance(cn_or_var, Variable):
-        var = cn_or_var
-        if var.determined_by is None and not var.valid:
-          var.add_to_pplan(var_pplan, self.mark)
-          var.valid = True
-    pplan = cn_pplan + var_pplan
-    # logger.DEBUG("pplan:\t%s" %", ".join([str(cn) for cn in reversed(pplan)]))
-    # logger.DEBUG("marks:\t%s" %", ".join([str(cn.mark) for cn in reversed(pplan)]))
-    return pplan
+  # def exec_pplan_create(self):
+  #   cn_pplan = []
+  #   var_pplan = []
+  #   for cn_or_var in self.exec_roots:
+  #     if isinstance(cn_or_var, Constraint):
+  #       cn = cn_or_var
+  #       cn.add_to_pplan(cn_pplan, self.mark)
+  #     elif isinstance(cn_or_var, Variable):
+  #       var = cn_or_var
+  #       if var.determined_by is None and not var.valid:
+  #         var.add_to_pplan(var_pplan, self.mark)
+  #         var.valid = True
+  #   pplan = cn_pplan + var_pplan
+  #   # logger.DEBUG("pplan:\t%s" %", ".join([str(cn) for cn in reversed(pplan)]))
+  #   # logger.DEBUG("marks:\t%s" %", ".join([str(cn.mark) for cn in reversed(pplan)]))
+  #   return pplan
 
-  def exec_from_roots(self):
-    self._new_mark()
+  # def exec_from_roots(self):
+  #   self._new_mark()
 
-    for cn in reversed(self.exec_pplan_create()):
-      if cn.mark == self.mark:
-        if self.any_immediate_upstream_marked(cn):
-          self.exec_from_cycle(cn)
-        else:
-          cn.mark = None
-          self.execute_propagate_valid(cn)
+  #   for cn in reversed(self.exec_pplan_create()):
+  #     if cn.mark == self.mark:
+  #       if self.any_immediate_upstream_marked(cn):
+  #         self.exec_from_cycle(cn)
+  #       else:
+  #         cn.mark = None
+  #         self.execute_propagate_valid(cn)
 
   def execute_propagate_valid(self, cn):
     inputs_valid = not cn.selected_method.has_invalid_vars()
@@ -232,18 +236,17 @@ class ConstraintSystem:
     for var in cn.selected_method.outputs:
       var.valid = inputs_valid
 
-  def exec_from_cycle(self, cn):
-    if self._cycle is None: self._cycle = set()
-    self._cycle.add(cn)
-    # logger.DEBUG("%s -> %s" %(cn, self.immediate_marked_upstream(cn)))
-    # logger.DEBUG(", ".join([str([var.determined_by, var.determined_by.mark]) for var in self.variables if var.determined_by]))
-    if cn.mark == self.mark:
-      cn.mark = None
-      for var in cn.selected_method.outputs:
-        var.valid = False
-        for consuming_cn in var.constraints:
-          if consuming_cn != cn and consuming_cn.is_enforced:
-            self.exec_from_cycle(consuming_cn)
+  # def exec_from_cycle(self, cn):
+  #   if self._cycle is None: self._cycle = set()
+  #   self._cycle.add(cn)
+
+  #   if cn.mark == self.mark:
+  #     cn.mark = None
+  #     for var in cn.selected_method.outputs:
+  #       var.valid = False
+  #       for consuming_cn in var.constraints:
+  #         if consuming_cn != cn and consuming_cn.is_enforced:
+  #           self.exec_from_cycle(consuming_cn)
 
 
 
@@ -264,27 +267,27 @@ class ConstraintSystem:
   # create-valid-plan in now Plan(....)
   # invalidate-constraint-plans is now constraint.invalidate_plans()
   # invalidate_plans_on_setting_method moved to constraint
-  def extract_plan(self, root_constraints):
-    good_constraints = []
-    bad_constraints = []
+  def extract_plan(self):
+    good_constraints = set()
+    bad_constraints = set()
     self._new_mark()
-    pplan = self.pplan_add(root_constraints)
+    pplan = self.pplan_add(self.exec_roots)
 
     while pplan:
       cn = pplan.pop()
       if cn.mark != self.mark:
         pass
       elif self.any_immediate_upstream_marked(cn):
-        bad_constraints.append(cn)
+        bad_constraints.add(cn)
       else:
         cn.mark = None
-        good_constraints.append(cn)
-    return Plan(root_constraints, good_constraints, bad_constraints, True)
+        good_constraints.add(cn)
+    self.plan = Plan(self.exec_roots, good_constraints, bad_constraints, True)
 
 
-  def execute_plan(self, plan):
-    if plan.valid:
-      for cn in plan.good_constraints:
+  def execute_plan(self):
+    if self.plan.valid:
+      for cn in self.plan.good_constraints:
         self.execute_propagate_valid(cn)
     else:
       raise ValueError("trying to execute invalid plan")

@@ -48,49 +48,49 @@ class PplanTests(TestCase):
       "plain variable return pplan as it was")
 
 
-class ExecFromRootTests(TestCase):
+# class ExecFromRootTests(TestCase):
 
-  def setUp(self):
-    self.cs = ConstraintSystem()
+#   def setUp(self):
+#     self.cs = ConstraintSystem()
 
-  def test_exec_pplan_create_with_empty_input(self):
-    pplan = self.cs.exec_pplan_create()
-    self.assertEqual([], pplan)
+#   def test_exec_pplan_create_with_empty_input(self):
+#     pplan = self.cs.exec_pplan_create()
+#     self.assertEqual([], pplan)
 
-  def test_exec_pplan_create_with_one_cn(self):
-    v = Variable("v", 1, self.cs)
-    cn = Constraint(lambda x: x == 5, Strength.STRONG, v, Method([], v, lambda: 5))
-    self.cs.add_constraint(cn)
-    self.cs.exec_roots = [cn]
-    self.assertEqual([cn], self.cs.exec_pplan_create())
+#   def test_exec_pplan_create_with_one_cn(self):
+#     v = Variable("v", 1, self.cs)
+#     cn = Constraint(lambda x: x == 5, Strength.STRONG, v, Method([], v, lambda: 5))
+#     self.cs.add_constraint(cn)
+#     self.cs.exec_roots = [cn]
+#     self.assertEqual([cn], self.cs.exec_pplan_create())
 
-  def test_exec_pplan_create_with_one_unmarked_cn(self):
-    v = Variable("v", 1, self.cs)
-    cn = Constraint(lambda x: x == 5, Strength.STRONG, v, Method([], v, lambda: 5))
-    self.cs.add_constraint(cn)
-    self.cs.exec_roots = [cn]
-    self.assertEqual([cn], self.cs.exec_pplan_create())
+#   def test_exec_pplan_create_with_one_unmarked_cn(self):
+#     v = Variable("v", 1, self.cs)
+#     cn = Constraint(lambda x: x == 5, Strength.STRONG, v, Method([], v, lambda: 5))
+#     self.cs.add_constraint(cn)
+#     self.cs.exec_roots = [cn]
+#     self.assertEqual([cn], self.cs.exec_pplan_create())
 
-  def test_exec_pplan_create_with_one_marked_cn(self):
-    v = Variable("v", 1, self.cs)
-    cn = Constraint(lambda x: x == 5, Strength.STRONG, v, Method([], v, lambda: 5))
-    self.cs.add_constraint(cn)
-    cn.mark = self.cs.mark
-    self.cs.exec_roots = [cn]
-    self.assertEqual([], self.cs.exec_pplan_create())
+#   def test_exec_pplan_create_with_one_marked_cn(self):
+#     v = Variable("v", 1, self.cs)
+#     cn = Constraint(lambda x: x == 5, Strength.STRONG, v, Method([], v, lambda: 5))
+#     self.cs.add_constraint(cn)
+#     cn.mark = self.cs.mark
+#     self.cs.exec_roots = [cn]
+#     self.assertEqual([], self.cs.exec_pplan_create())
 
-  @skip("Broken test.")
-  def test_exec_pplan_create_with_one_undetermined_var(self):
-    v = Variable("v", 1, self.cs)
-    cn = Constraint(lambda x: x == 5, Strength.STRONG, v, Method([], v, lambda: 5))
-    self.cs.add_constraint(cn)
-    v.determined_by = None
-    self.cs.exec_roots = [v]
-    self.assertEqual([cn], self.cs.exec_pplan_create())
+  # @skip("Broken test.")
+  # def test_exec_pplan_create_with_one_undetermined_var(self):
+  #   v = Variable("v", 1, self.cs)
+  #   cn = Constraint(lambda x: x == 5, Strength.STRONG, v, Method([], v, lambda: 5))
+  #   self.cs.add_constraint(cn)
+  #   v.determined_by = None
+  #   self.cs.exec_roots = [v]
+  #   self.assertEqual([cn], self.cs.exec_pplan_create())
 
-  def test_exec_pplan_create_with_one_determined_var(self):
-    v = Variable("v", 1, self.cs)
-    cn = Constraint(lambda x: x == 5, Strength.STRONG, v, Method([], v, lambda: 5))
-    self.cs.add_constraint(cn)
-    self.cs.exec_roots = [v]
-    self.assertEqual([], self.cs.exec_pplan_create())
+  # def test_exec_pplan_create_with_one_determined_var(self):
+  #   v = Variable("v", 1, self.cs)
+  #   cn = Constraint(lambda x: x == 5, Strength.STRONG, v, Method([], v, lambda: 5))
+  #   self.cs.add_constraint(cn)
+  #   self.cs.exec_roots = [v]
+  #   self.assertEqual([], self.cs.exec_pplan_create())

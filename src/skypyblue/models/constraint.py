@@ -65,7 +65,7 @@ class Constraint:
   def invalidate_plans(self):
     for plan in self.valid_plans:
       plan.valid = False
-      for constraint in set(plan.root_constraints+plan.good_constraints+plan.bad_constraints):
+      for constraint in plan.root_constraints.union(plan.good_constraints).union(plan.bad_constraints):
         if self != constraint:
           self.valid_plans.remove(plan)
 
@@ -82,7 +82,7 @@ class Constraint:
   def selected_method(self):
     return self._selected_method
 
-  @selected_method.setter 
+  @selected_method.setter
   def selected_method(self,method):
     self._selected_method = method
     self.invalidate_plans_on_setting_method(method)
