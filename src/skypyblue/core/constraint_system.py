@@ -4,7 +4,7 @@ from skypyblue.core import Mvine, Marker, CycleException, logger
 import pdb
 
 
-def fail_on_cylce(func):
+def fail_on_cycle(func):
   def wrapper(self, *args, **kwargs):
     self._cycle = None
     res = func(self, *args, **kwargs)
@@ -81,7 +81,7 @@ class ConstraintSystem:
     self.add_constraint(stay_constraint)
     return stay_constraint
 
-  @fail_on_cylce
+  @fail_on_cycle
   def add_constraint(self, constraint):
     constraint.selected_method = None
     constraint.mark = None
@@ -97,7 +97,7 @@ class ConstraintSystem:
     self.constraints.append(constraint)
     self._check_constraints()
 
-  @fail_on_cylce
+  @fail_on_cycle
   def remove_constraint(self, constraint, skip = False):
     for variable in constraint.variables:
       variable.remove_constraint(constraint)
