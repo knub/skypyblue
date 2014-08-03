@@ -12,6 +12,6 @@ class Plan(object):
     self.good_constraints = good_constraints
     self.bad_constraints = bad_constraints
     self.valid = valid
-    cns = self.root_constraints + self.good_constraints + self.bad_constraints
-    for cn in cns:
-        cn.add_valid_plan(self)
+    constraints = self.root_constraints + self.good_constraints + self.bad_constraints
+    for constraint in constraints:
+        constraint.add_valid_plan(self)

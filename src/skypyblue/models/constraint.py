@@ -28,20 +28,18 @@ class Constraint(object):
     self.name = name
 
   def add_to_pplan(self, pplan, done_mark):
-    # logger.DEBUG("adding cns from %s to %s" %(self, pplan))
-    insert_idx = len(pplan)
+    insert_index = len(pplan)
     stack = [self]
     while stack:
-      cur_cn = stack.pop()
-      if cur_cn.selected_method is None or cur_cn.mark == done_mark:
+      current_constraint = stack.pop()
+      if current_constraint.selected_method is None or current_constraint.mark == done_mark:
         continue
-      cur_cn.mark = done_mark
-      pplan.insert(insert_idx, cur_cn)
-      # logger.DEBUG("added %s to pplan" %(cur_cn))
-      for var in cur_cn.selected_method.outputs:
-        for var_cn in var.constraints:
-          if var_cn != var.determined_by:
-            stack.append(var_cn)
+      current_constraint.mark = done_mark
+      pplan.insert(insert_index, current_constraint)
+      for variable in current_constraint.selected_method.outputs:
+        for constraint in variable.constraints:
+          if constraint != variable.determined_by:
+            stack.append(constraint)
     return pplan
 
 
@@ -75,9 +73,9 @@ class Constraint(object):
   def invalidate_plans_on_setting_method(self):
     self.invalidate_plans()
     if self._selected_method != None:
-      for var in self._selected_method.inputs:
-        if var.determined_by != None:
-          var.determined_by.invalidate_plans()
+      for variable in self._selected_method.inputs:
+        if variable.determined_by != None:
+          variable.determined_by.invalidate_plans()
 
   @property
   def selected_method(self):

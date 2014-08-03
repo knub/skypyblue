@@ -1,74 +1,69 @@
 from skypyblue.models import Strength
-# from skypyblue.core import logger
+
 class Mvine(object):
   def __init__(self, marker):
     self.marker = marker
     self.mark = marker.mark
     self.stack = []
     self.root_strength = Strength.WEAKEST
-    self.redetermined_vars = set()
+    self.redetermined_variables = set()
     self.enforced, self.revoked = [], []
 
-  def build(self, cn, redetermined_vars):
+  def build(self, constraint, redetermined_variables):
     self.marker.new_mark()
-    # logger.DEBUG("building from: %s" %cn)
     self.mark = self.marker.mark
-    self.stack = [cn]
-    self.root_strength = cn.strength
-    self.redetermined_vars = redetermined_vars
+    self.stack = [constraint]
+    self.root_strength = constraint.strength
+    self.redetermined_variables = redetermined_variables
     if not self.determine_enforced_and_revoked():
       return False
 
-    # logger.DEBUG("revoked: %s, enforced: %s" %(self.revoked, [cn[0] for cn in self.enforced]))
-    for cn in self.revoked:
-      self.reset_outputs(cn.selected_method)
-      cn.selected_method = None
+    for constraint in self.revoked:
+      self.reset_outputs(constraint.selected_method)
+      constraint.selected_method = None
 
-    for cn, mt in self.enforced:
-      if cn.selected_method is not None:
-        self.reset_outputs(cn.selected_method)
-      cn.selected_method = mt
-      mt.mark = None
-      for var in mt.outputs:
-        var.determined_by = cn
-        # logger.DEBUG("adding %s to redetermined_vars" %var)
-        self.redetermined_vars.add(var)
-
-    # logger.DEBUG("redetermined_vars: %s" %(self.redetermined_vars))
+    for constraint, method in self.enforced:
+      if constraint.selected_method is not None:
+        self.reset_outputs(constraint.selected_method)
+      constraint.selected_method = method
+      method.mark = None
+      for variable in method.outputs:
+        variable.determined_by = constraint
+        self.redetermined_variables.add(variable)
 
     return True
 
-  def add_conflicting_cns_to_stack(self, mt):
+  def add_conflicting_cns_to_stack(self, method):
     # mark outputs
     # add cns, which are not marked and determine outputs of the current method
-    for var in mt.outputs:
-      var.mark = self.mark
-      if var.determined_by is not None and var.determined_by.mark != self.mark:
+    for variable in method.outputs:
+      variable.mark = self.mark
+      if variable.determined_by is not None and variable.determined_by.mark != self.mark:
         # possible dublicates?
-        self.stack.append(var.determined_by)
+        self.stack.append(variable.determined_by)
 
   def backtrack(self):
     self.revoked.pop()
-    cn, mt = self.enforced.pop()
+    constraint, method = self.enforced.pop()
     # unmark the outputs
-    for var in mt.outputs: var.mark = None
-    cn.mark = None
+    for variable in method.outputs: variable.mark = None
+    constraint.mark = None
     # append last enforced cn back to the stack
-    self.stack.append(cn)
+    self.stack.append(constraint)
 
   def determine_enforced_and_revoked(self):
     self.enforced, self.revoked = [], []
     while True:
       if not self.stack: break
-      cn = self.stack.pop()
-      if cn.mark == self.mark: continue
-      cn.mark = self.mark
+      constraint = self.stack.pop()
+      if constraint.mark == self.mark: continue
+      constraint.mark = self.mark
 
-      if Strength.weaker(cn.strength, self.root_strength):
-        self.revoked.append(cn)
+      if Strength.weaker(constraint.strength, self.root_strength):
+        self.revoked.append(constraint)
       else:
-        mt = self.next_possible_method(cn)
-        if mt is None:
+        method = self.next_possible_method(constraint)
+        if method is None:
           # no method found, backtrack
           if not self.enforced or not self.revoked:
             # no backtrack possible, so we cannot enforce
@@ -76,35 +71,34 @@ class Mvine(object):
             return False
           self.backtrack()
         else:
-          self.enforced.append((cn, mt))
-          self.add_conflicting_cns_to_stack(mt)
+          self.enforced.append((constraint, method))
+          self.add_conflicting_cns_to_stack(method)
     return True
 
 
-  def reset_outputs(self, mt):
-    for var in mt.outputs:
-      if var.mark != self.mark:
-        var.determined_by = None
-        var.walk_strength = Strength.WEAKEST
-        # logger.DEBUG("reseting %s and adding to redetermined_vars" %var)
-        self.redetermined_vars.add(var)
+  def reset_outputs(self, method):
+    for variable in method.outputs:
+      if variable.mark != self.mark:
+        variable.determined_by = None
+        variable.walk_strength = Strength.WEAKEST
+        self.redetermined_variables.add(variable)
 
-  def next_possible_method(self, cn):
-    for mt in cn.methods:
-      if mt.mark != self.mark and self.is_possible_method(mt, cn):
-        mt.mark = self.mark
-        return mt
+  def next_possible_method(self, constraint):
+    for method in constraint.methods:
+      if method.mark != self.mark and self.is_possible_method(method, constraint):
+        method.mark = self.mark
+        return method
     return None
 
-  def is_possible_method(self, mt, cn):
-    for var in mt.outputs:
+  def is_possible_method(self, method, constraint):
+    for variable in method.outputs:
       # not possible if:
       # outvar_is_marked or
       # (is_determined_by_other_stronger_cn and
       # (cn_is_not_enforced or outvar_is_output_of_selected_method)) < not already determined by cn's current method
-      if var.mark == self.mark or \
-      (var.walk_strength >= self.root_strength and \
-      (not cn.is_enforced() or \
-        var not in cn.selected_method.outputs)):
+      if variable.mark == self.mark or \
+      (variable.walk_strength >= self.root_strength and \
+      (not constraint.is_enforced() or \
+        variable not in constraint.selected_method.outputs)):
         return False
     return True

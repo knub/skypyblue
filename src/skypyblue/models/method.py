@@ -1,8 +1,8 @@
 class Method(object):
-  def __init__(self, in_vars, out_vars, method):
+  def __init__(self, input_variables, output_variables, method):
     """
-    in_vars:\tlist of (or single object) skypyblue.models.variables.Variable that are handled as input
-    out_vars:\tlist of (or single object) skypyblue.models.variables.Variable that are handled as output
+    input_variables:\tlist of (or single object) skypyblue.models.variables.Variable that are handled as input
+    output_variables:\tlist of (or single object) skypyblue.models.variables.Variable that are handled as output
     method:\tlamba that fullfils the contraint. the result of the lambda will be assigned to the output variables
 
     Usage:
@@ -12,8 +12,8 @@ class Method(object):
       method2 = Method([v1, v2], [v3, v4],
         lambda v1, v2: v1+v2, v1-v2)
     """
-    self.inputs = in_vars if isinstance(in_vars, list) else [in_vars]
-    self.outputs = out_vars if isinstance(out_vars, list) else [out_vars]
+    self.inputs = input_variables if isinstance(input_variables, list) else [input_variables]
+    self.outputs = output_variables if isinstance(output_variables, list) else [output_variables]
     self.method = method
     self.mark = None
 

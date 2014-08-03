@@ -14,9 +14,9 @@ class Variable(object):
     system.variables.append(self)
 
   def add_to_pplan(self, pplan, done_mark):
-    for cn in self.constraints:
-      if cn != self.determined_by:
-        cn.add_to_pplan(pplan, done_mark)
+    for constraint in self.constraints:
+      if constraint != self.determined_by:
+        constraint.add_to_pplan(pplan, done_mark)
     return pplan
 
   def get_value(self):
@@ -28,12 +28,10 @@ class Variable(object):
       self.system.variable_changed(self)
 
   def remove_constraint(self, constraint):
-    self.constraints.remove(constraint)# = [cn for cn in self.constraints if cn != constraint]
-    # print self, self.constraints
+    self.constraints.remove(constraint)
 
   def add_constraint(self, constraint):
     self.constraints.add(constraint)
-    # print self, self.constraints
 
   def stay(self, strength = Strength.WEAK):
     if self.stay_constraint is not None:
@@ -45,7 +43,6 @@ class Variable(object):
     if self.stay_constraint is not None:
       self.system.remove_constraint(self.stay_constraint)
       self.stay_constraint = None
-
 
   def __repr__(self):
     return "<Variable '%s', value: %s>" % (self.name, self._value)
