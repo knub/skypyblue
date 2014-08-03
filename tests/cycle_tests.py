@@ -34,7 +34,7 @@ class CycleTest(TestCase):
       for cn in [cn1, cn2, cn3, cn4]:
         self.cs.add_constraint(cn)
     except CycleException as c_exc:
-      self.assertEqual(set([cn1, cn2, cn3]), c_exc.cycled_constraints)
+      self.assertEqual(set([cn1, cn2, cn3]), set(c_exc.cycled_constraints))
       for var in c_exc.cycled_variables:
         self.assertFalse(var.valid, "%s should be invalid" %(var) )
     else:

@@ -1,6 +1,6 @@
 from skypyblue.models import Strength
 
-class Variable:
+class Variable(object):
   def __init__(self, name, value, system, walk_strength = Strength.WEAKEST):
     self.name = name
     self._value = value

@@ -1,6 +1,6 @@
 from skypyblue.models import Method, Constraint
 
-class ConstraintFactory:
+class ConstraintFactory(object):
   @staticmethod
   def equality_constraint(variable1, variable2, strength, name = ""):
     m1 = Method([variable1], [variable2],

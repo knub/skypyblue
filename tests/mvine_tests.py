@@ -47,4 +47,3 @@ class MVineTests(TestCase):
     self.assertIsNone(v2.determined_by)
     self.assertEqual(cn, v3.determined_by)
     self.assertIsNotNone(cn.mark)
-

@@ -1,6 +1,6 @@
 from skypyblue.models import Strength
 # from skypyblue.core import logger
-class Mvine:
+class Mvine(object):
   def __init__(self, marker):
     self.marker = marker
     self.mark = marker.mark

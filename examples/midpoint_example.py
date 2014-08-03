@@ -4,6 +4,7 @@ sys.path.append("../tests")
 
 from skypyblue.core import ConstraintSystem
 from skypyblue.models import *
+from point import Point
 
 from point import Point
 
