@@ -165,8 +165,6 @@ class ConstraintSystem(object):
       max_strengths.append(constraint.strength)
       out_var.walk_strength = min(max_strengths)
 
-
-
   def max_out(self, method, current_outputs):
     return max([variable.walk_strength for variable in method.outputs if variable not in current_outputs])
 
@@ -212,11 +210,9 @@ class ConstraintSystem(object):
       el.add_to_pplan(pplan, self.mark)
     return pplan
 
-
   def _new_mark(self):
     self.marker.new_mark()
     self.mark = self.marker.mark
-
 
   def extract_plan(self):
     good_constraints = []
@@ -233,13 +229,9 @@ class ConstraintSystem(object):
         good_constraints.append(constraint)
     self.plan = Plan(self.exec_roots, good_constraints, bad_constraints, True)
 
-
   def execute_plan(self):
     if self.plan.valid:
       for constraint in self.plan.good_constraints:
         self.execute_propagate_valid(constraint)
     else:
       raise ValueError("trying to execute invalid plan")
-
-
-

@@ -8,7 +8,6 @@ from skypyblue.core import ConstraintSystem, Mvine
 from skypyblue.models import *
 from fixture import Fixture
 
-
 class UpdateMethodGraphTests(TestCase):
 
   def setUp(self):

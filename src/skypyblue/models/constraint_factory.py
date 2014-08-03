@@ -32,4 +32,3 @@ class ConstraintFactory(object):
       [m1, m2], name)
 
     return constraint
-

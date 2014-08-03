@@ -18,7 +18,6 @@ class ConstraintTests(TestCase):
   def tearDown(self):
     pass
 
-
   def test_adding_enforced_to_pplan(self):
     self.assertIsNone(self.constraint.mark)
 
@@ -55,4 +54,3 @@ class ConstraintTests(TestCase):
 
     self.assertEqual([self.constraint], pplan)
     self.assertEqual(mark2, self.constraint.mark)
-

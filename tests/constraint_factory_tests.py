@@ -42,4 +42,3 @@ class ConstraintFactoryTestClass(unittest.TestCase):
     self.assertTrue(destination.get_value() == scale.get_value() * source.get_value() + offset.get_value())
     destination.set_value(100)
     self.assertTrue(destination.get_value() == scale.get_value() * source.get_value() + offset.get_value())
-

@@ -30,7 +30,6 @@ class Mvine(object):
       for variable in method.outputs:
         variable.determined_by = constraint
         self.redetermined_variables.add(variable)
-
     return True
 
   def add_conflicting_cns_to_stack(self, method):

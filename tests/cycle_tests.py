@@ -20,7 +20,6 @@ class CycleTest(TestCase):
       for constraint in [constraint1, constraint2, constraint3, constraint4]:
         self.constraint_system.add_constraint(constraint)
 
-
   def test_cycle_variables_should_be_invalid(self):
     a, b, c, d = self.constraint_system.create_variables(["a", "b", "c", "d"], [1, 2, 3, 0])
     one = Variable("1", 1, self.constraint_system)
@@ -39,7 +38,6 @@ class CycleTest(TestCase):
         self.assertFalse(variable.valid, "%s should be invalid" %(variable) )
     else:
       raise Exception("should have risen an CycleException")
-
 
   def test_should_not_detect_a_cycle(self):
     a, b, c = self.constraint_system.create_variables(["a", "b", "c"], [1, 2, 3])

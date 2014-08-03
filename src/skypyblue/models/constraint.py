@@ -42,7 +42,6 @@ class Constraint(object):
             stack.append(constraint)
     return pplan
 
-
   def is_enforced(self):
     "returns True is there is is a method selected, otherwise False"
     return self.selected_method is not None
@@ -85,7 +84,3 @@ class Constraint(object):
   def selected_method(self, method):
     self._selected_method = method
     self.invalidate_plans_on_setting_method()
-
-
-
-
