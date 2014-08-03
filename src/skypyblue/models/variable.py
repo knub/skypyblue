@@ -2,6 +2,17 @@ from skypyblue.models import Strength
 
 class Variable(object):
   def __init__(self, name, value, system, walk_strength = Strength.WEAKEST):
+    """
+    name:             a string that is the name of the variable
+    value:            an object that is the initial value of the variable
+    system:           the constraints system the variable belongs to
+
+    Usage:
+      v = Variable(
+        "v",
+        1,
+        constraint_system)
+    """
     self.name = name
     self._value = value
     self.constraints = set()
