@@ -1,7 +1,7 @@
 
 
 class CycleException(Exception):
-  """Constraint system raises this exception, if a cycle was detected"""
+  """ConstraintSystem raises this exception, when a cycle is detected."""
   def __init__(self, bad_constraints, message = "", *args, **kwargs):
     self.cycled_constraints = bad_constraints
     self.cycled_variables = [variable for constraint in bad_constraints for variable in constraint.selected_method.outputs if constraint.selected_method is not None]

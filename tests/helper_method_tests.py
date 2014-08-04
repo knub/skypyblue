@@ -18,7 +18,7 @@ class HelperTests(TestCase):
     v2 = Variable("v2", 12, cs)
     method = Method(v1, v2, lambda v1: v1 - 1)
 
-    self.assertEqual(Strength.WEAKEST, cs.max_out(method, [v1]))
+    self.assertEqual(Strength.WEAKEST, cs._max_out(method, [v1]))
 
   def test_new_mark_are_numbers(self):
     used_marks = set()

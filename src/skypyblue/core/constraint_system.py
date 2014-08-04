@@ -11,7 +11,27 @@ def fail_on_cycle(func):
   return wrapper
 
 # https://www.cs.washington.edu/research/constraints/solvers/skyblue-cycles.html
+
 class ConstraintSystem(object):
+  """This class encapsulates a set of constraints.
+
+  Usage:
+  >>> cs = ConstraintSystem()
+  >>> v1 = Variable("v1", 1, cs)
+  >>> v2 = Variable("v2", 2, cs)
+
+  >>> m1 = Method([v1], [v2], lambda v1: v1)
+  >>> m2 = Method([v2], [v2], lambda v2: v2)
+
+  >>> constraint = Constraint(
+  >>>   lambda v1, v2: v1 == v2,
+  >>>   Strength.STRONG,
+  >>>   [v1, v2], [m1, m2])
+  >>> cs.add_constraint(constraint)
+
+  >>> v1.get_value() # => 1
+  >>> v2.get_value() # => 1
+  """
 
   def __init__(self):
     self.marker = Marker()
@@ -27,6 +47,10 @@ class ConstraintSystem(object):
     self._cycle = None
 
   def create_variables(self, names, initialValues):
+    """
+    Creates several variables at once.
+    >>> v1, v2, v3 = constraint_system.create_variables(["v1", "v2", "v3"], [4, 5, 3])
+    """
     assert len(names) == len(initialValues)
     variables = []
     for i in range(len(names)):
@@ -34,6 +58,13 @@ class ConstraintSystem(object):
     return variables
 
   def change_variable_values(self, variables, values):
+    """Allows to change several variables at once.
+
+    >>> constraint_system.change_variable_values(
+    >>>     [self.v1, self.v2],
+    >>>     [10, 20]
+    >>> )
+    """
     assert len(variables) == len(values)
 
     if len(variables) == 1:
@@ -54,7 +85,7 @@ class ConstraintSystem(object):
     self.forced_constraint = constraint
     self.add_constraint(constraint)
 
-  def variable_changed(self, variable):
+  def _variable_changed(self, variable):
     self.change_variable_values([variable], [variable.get_value()])
 
   def _check_constraints(self):
@@ -67,7 +98,7 @@ class ConstraintSystem(object):
       if not check:
         raise Exception("Constraint %s is not satisfied" % constraint)
 
-  def add_stay_constraint(self, variable, strength):
+  def _add_stay_constraint(self, variable, strength):
     method = Method([], [variable], lambda: variable.get_value())
     stay_constraint = Constraint(
       lambda x: True,
@@ -88,10 +119,10 @@ class ConstraintSystem(object):
     self.unenforced_constraints = set([constraint])
     self.exec_roots = []
 
-    self.update_method_graph()
-    self.extract_plan()
+    self._update_method_graph()
+    self._extract_plan()
 
-    self.execute_plan()
+    self._execute_plan()
 
     self.constraints.append(constraint)
     self._check_constraints()
@@ -117,24 +148,24 @@ class ConstraintSystem(object):
       if skip:
         return
 
-      self.propagate_walk_strength(old_outputs)
+      self._propagate_walk_strength(old_outputs)
       self.unenforced_constraints = set()
-      self.collect_unenforced(constraint.strength, True)
-      self.update_method_graph()
+      self._collect_unenforced(constraint.strength, True)
+      self._update_method_graph()
 
-      self.extract_plan()
-      self.execute_plan()
+      self._extract_plan()
+      self._execute_plan()
 
     self._check_constraints()
 
-  def update_method_graph(self):
+  def _update_method_graph(self):
     while self.unenforced_constraints:
-      constraint = self.remove_strongest_constraint()
+      constraint = self._remove_strongest_constraint()
       self.redetermined_variables.clear()
       if not Mvine(self.marker).build(constraint, self.redetermined_variables):
         continue
-      self.propagate_walk_strength(self.redetermined_variables.union([constraint]))
-      self.collect_unenforced(constraint.strength, False)
+      self._propagate_walk_strength(self.redetermined_variables.union([constraint]))
+      self._collect_unenforced(constraint.strength, False)
       self.exec_roots.append(constraint)
       self.exec_roots.extend([var_constraint \
         for var in self.redetermined_variables \
@@ -142,33 +173,33 @@ class ConstraintSystem(object):
             if var.determined_by is None and \
               var_constraint.is_enforced()])
 
-  def remove_strongest_constraint(self):
+  def _remove_strongest_constraint(self):
     sorted_constraints = sorted(self.unenforced_constraints, key = lambda constraint: constraint.strength, reverse = True)
     strongest_constraint = sorted_constraints[0]
     self.unenforced_constraints.remove(strongest_constraint)
     return strongest_constraint
 
-  def propagate_walk_strength(self, roots):
+  def _propagate_walk_strength(self, roots):
     self._new_mark()
 
-    for constraint in self.pplan_add(roots):
+    for constraint in self._pplan_add(roots):
       for var in constraint.selected_method.inputs:
         if var.determined_by is not None and var.determined_by.mark == self.mark:
           var.walk_strength = Strength.WEAKEST
-      self.compute_walkabout_strengths(constraint)
+      self._compute_walkabout_strengths(constraint)
       constraint.mark = None
 
-  def compute_walkabout_strengths(self, constraint):
+  def _compute_walkabout_strengths(self, constraint):
     outs = constraint.selected_method.outputs
     for out_var in outs:
-      max_strengths = [self.max_out(method, outs) for method in constraint.methods if out_var not in method.outputs]
+      max_strengths = [self._max_out(method, outs) for method in constraint.methods if out_var not in method.outputs]
       max_strengths.append(constraint.strength)
       out_var.walk_strength = min(max_strengths)
 
-  def max_out(self, method, current_outputs):
+  def _max_out(self, method, current_outputs):
     return max([variable.walk_strength for variable in method.outputs if variable not in current_outputs])
 
-  def collect_unenforced(self, collection_strength, collect_equal_strength):
+  def _collect_unenforced(self, collection_strength, collect_equal_strength):
     self._new_mark()
     for variable in self.redetermined_variables:
       stack = [variable]
@@ -184,16 +215,13 @@ class ConstraintSystem(object):
                 (collect_equal_strength and (constraint.strength == collection_strength)):
             self.unenforced_constraints.add(constraint)
 
-  def any_immediate_upstream_marked(self, constraint):
+  def _any_immediate_upstream_marked(self, constraint):
     for variable in constraint.selected_method.inputs:
       if variable.determined_by is not None and variable.determined_by.mark == self.mark:
         return True
     return False
 
-  def immediate_marked_upstream(self, constraint):
-    return [variable.determined_by for variable in constraint.selected_method.inputs if variable.determined_by is not None and variable.determined_by.mark == self.mark]
-
-  def execute_propagate_valid(self, constraint):
+  def _execute_propagate_valid(self, constraint):
     inputs_valid = not constraint.selected_method.has_invalid_vars()
 
     if inputs_valid:
@@ -202,7 +230,7 @@ class ConstraintSystem(object):
     for variable in constraint.selected_method.outputs:
       variable.valid = inputs_valid
 
-  def pplan_add(self, objs):
+  def _pplan_add(self, objs):
     pplan = []
     if not isinstance(objs, set) and not isinstance(objs, list):
       raise Exception("accepting only set of objs! Got %s of type %s" %(objs, type(objs)))
@@ -214,24 +242,24 @@ class ConstraintSystem(object):
     self.marker.new_mark()
     self.mark = self.marker.mark
 
-  def extract_plan(self):
+  def _extract_plan(self):
     good_constraints = []
     bad_constraints = []
     self._new_mark()
 
-    for constraint in reversed(self.pplan_add(self.exec_roots)):
+    for constraint in reversed(self._pplan_add(self.exec_roots)):
       if constraint.mark != self.mark:
         continue
-      elif self.any_immediate_upstream_marked(constraint):
+      elif self._any_immediate_upstream_marked(constraint):
         bad_constraints.append(constraint)
       else:
         constraint.mark = None
         good_constraints.append(constraint)
     self.plan = Plan(self.exec_roots, good_constraints, bad_constraints, True)
 
-  def execute_plan(self):
+  def _execute_plan(self):
     if self.plan.valid:
       for constraint in self.plan.good_constraints:
-        self.execute_propagate_valid(constraint)
+        self._execute_propagate_valid(constraint)
     else:
       raise ValueError("trying to execute invalid plan")

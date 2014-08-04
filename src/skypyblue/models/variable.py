@@ -36,7 +36,7 @@ class Variable(object):
   def set_value(self, value, triggerChange = True):
     self._value = value
     if self.system is not None and triggerChange:
-      self.system.variable_changed(self)
+      self.system._variable_changed(self)
 
   def remove_constraint(self, constraint):
     self.constraints.remove(constraint)
@@ -48,7 +48,7 @@ class Variable(object):
     if self.stay_constraint is not None:
       self.system.remove_constraint(self.stay_constraint)
 
-    self.stay_constraint = self.system.add_stay_constraint(self, strength)
+    self.stay_constraint = self.system._add_stay_constraint(self, strength)
 
   def remove_stay_constraint(self):
     if self.stay_constraint is not None:

@@ -1,7 +1,7 @@
+from skypyblue.core import ConstraintSystem
+from skypyblue.models import Strength, Variable
 
 cs = ConstraintSystem()
-
-# p = Point(10,15)
 
 v1 = Variable("v1", 15, cs)
 v2 = Variable("v2", 15, cs)
@@ -25,9 +25,6 @@ cn1 = Constraint(
 
 cs.add_constraint(cn1) # sets v3 to 30 and v4 to 0
 
-v3.set_value(10) # observer/listener?
-v1.get_value() # 5
-v2.get_value() # 5
-
-# Questions
-# - Example? Sophisticated test case?
+v3.set_value(10)
+print(v1.get_value()) # 5
+print(v2.get_value()) # 5

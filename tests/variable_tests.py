@@ -13,7 +13,7 @@ class VariableTest(unittest.TestCase):
   def setUp(self):
     self.variable = Variable("variable", 10, Mock())
     self.variable.system.remove_constraint = Mock()
-    self.variable.system.add_stay_constraint = Mock()
+    self.variable.system._add_stay_constraint = Mock()
 
   def test_get_and_set_variable(self):
     self.assertEqual(self.variable.get_value(), 10)
@@ -24,11 +24,11 @@ class VariableTest(unittest.TestCase):
     self.assertTrue(self.variable.stay_constraint is None)
     self.variable.stay()
     self.assertFalse(self.variable.stay_constraint is None)
-    self.variable.system.add_stay_constraint.assert_called_with(self.variable,Strength.WEAK)
+    self.variable.system._add_stay_constraint.assert_called_with(self.variable,Strength.WEAK)
 
   def test_stay_tow_times(self):
     self.variable.stay()
     self.assertFalse(self.variable.system.remove_constraint.called)
     self.variable.stay(Strength.STRONG)
     self.assertTrue(self.variable.system.remove_constraint.called)
-    self.variable.system.add_stay_constraint.assert_called_with(self.variable,Strength.STRONG)
+    self.variable.system._add_stay_constraint.assert_called_with(self.variable,Strength.STRONG)
