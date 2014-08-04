@@ -271,19 +271,20 @@ class ConstraintSystem(object):
   # invalidate-constraint-plans is now constraint.invalidate_plans()
   # invalidate_plans_on_setting_method moved to constraint
   def extract_plan(self):
-    good_constraints = []
-    bad_constraints = []
-    self._new_mark()
+    if self.plan is None or not self.plan.valid:
+      good_constraints = []
+      bad_constraints = []
+      self._new_mark()
 
-    for cn in reversed(self.pplan_add(self.exec_roots)):
-      if cn.mark != self.mark:
-        continue
-      elif self.any_immediate_upstream_marked(cn):
-        bad_constraints.append(cn)
-      else:
-        cn.mark = None
-        good_constraints.append(cn)
-    self.plan = Plan(self.exec_roots, good_constraints, bad_constraints, True)
+      for cn in reversed(self.pplan_add(self.exec_roots)):
+        if cn.mark != self.mark:
+          continue
+        elif self.any_immediate_upstream_marked(cn):
+          bad_constraints.append(cn)
+        else:
+          cn.mark = None
+          good_constraints.append(cn)
+      self.plan = Plan(self.exec_roots, good_constraints, bad_constraints, True)
 
 
   def execute_plan(self):
