@@ -12,6 +12,8 @@ Tested with Python2.7, Python3.x and Pypy
 **ConstraintSystem, Variable, Method, Constraint, Strength** 
 
 ```python
+from skypyblue.models import ConstraintSystem, Variable, Method, Constraint, Strength
+
 cs = ConstraintSystem()
 
 v1 = Variable("v1", 1, cs)
@@ -34,6 +36,8 @@ v2.get_value() # => 1
 ### ConstraintFactory
 
 ```python
+from skypyblue.models import ConstraintSystem, Variable, ConstraintFactory, Strength
+
 cs = ConstraintSystem()
 
 v1 = Variable("v1", 1, cs)
