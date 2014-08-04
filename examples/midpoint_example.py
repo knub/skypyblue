@@ -1,3 +1,12 @@
+"""
+  This demo shows how Skypyblue constraints could be used for a graphical user interface.
+  There are five points (Pm, P1, P2, P3, P4).
+  We want to implement the following behavior:
+    - Pm is the midpoint of P1 and P2.
+    - If we grab Pm, we move the whole line P1-Pm-P2.
+    - If we grab P1 or P2, we change the direction of the line.
+    - The direction of the line P1-Pm-P2 is the same as P3-P4.
+"""
 import pygame, math, sys
 sys.path.append("../src")
 sys.path.append("../tests")
@@ -6,14 +15,12 @@ from skypyblue.core import ConstraintSystem
 from skypyblue.models import *
 from point import Point
 
-from point import Point
-
 cs = ConstraintSystem()
 pm_var = Variable("pm", Point(600, 400), cs)
 p1_var = Variable("p1", Point(250, 100), cs)
 p2_var = Variable("p2", Point(200, 400), cs)
-p3_var = Variable("p1", Point(100, 150), cs)
-p4_var = Variable("p2", Point(100, 250), cs)
+p3_var = Variable("p3", Point(100, 150), cs)
+p4_var = Variable("p4", Point(100, 250), cs)
 
 
 def all_points():
@@ -46,29 +53,30 @@ def main():
   pygame.mouse.set_visible(1)
   pygame.key.set_repeat(1, 30)
   clock = pygame.time.Clock()
-  # Die Schleife, und damit unser Spiel, laeuft solange running == True.
+  # Game runs while running == True.
   running = 1
   c = 0
   while running:
-    c = (c + 1) % 50
-    # Framerate auf 30 Frames pro Sekunde beschraenken.
-    # Pygame wartet, falls das Programm schneller laeuft.
+    # add some artifical flickering every nth frame ;)
+    n = 50
+    c = (c + 1) % n
+    # Set framerate.
     clock.tick(30)
 
-    # surface mit Schwarz (RGB = 0, 0, 0) fuellen.
     surface.fill(BLACK)
     for event in pygame.event.get():
-      # Spiel beenden, wenn wir ein QUIT-Event finden.
+      # Finish game, once we find a quit event
       if event.type == pygame.QUIT: running = False
       quit_on_escape(event)
       handle_mouse_event(event)
     pygame.display.flip()
     if c != 0:
+      # artifical flickering
       draw_lines(surface)
 
 def quit_on_escape(event):
   if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
-    # Wenn Escape gedrueckt wird, posten wir ein QUIT-Event in Pygames Event-Warteschlange.
+    # If escape is pressed, we post a quit event.
     pygame.event.post(pygame.event.Event(pygame.QUIT))
 
 def handle_mouse_event(event):
@@ -141,7 +149,6 @@ def create_constraints():
     )
   )
 
-
   constraint = Constraint(
     lambda p1, p2, p3, p4, pm: pm.is_midpoint(p1, p2) and
                          p1.distance(pm) == p3.distance(p4),
@@ -153,7 +160,6 @@ def create_constraints():
 
   p3_var.stay()
   p4_var.stay()
-
 
 if __name__ == '__main__':
   create_constraints()
