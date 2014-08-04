@@ -100,9 +100,4 @@ python setup.py sdist upload
 
 ### Bugs, Problems?
 
-stefan.bunk@..
-daniel.kurzynski@..
-dimitri.korsch@
-
-..@student.hpi.uni-potsdam.de
-
+Just open an issue.
